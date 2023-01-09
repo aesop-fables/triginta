@@ -1,14 +1,14 @@
-# @DovetailSoftware/lambduh
+# @aesop-fables/triginta
 
-`lambduh` is a lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.). For APIs, see our `API framework`. It aims
+`triginta` is a lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.). For APIs, see our `API framework`. It aims
 to conventionalize logging, error handling, and X-Ray integration.
 
 ## Installation
 ```
-npm install @dovetailsoftware/lambduh
+npm install @aesop-fables/triginta
 ```
 ```
-yarn add @dovetailsoftware/lambduh
+yarn add @aesop-fables/triginta
 ```
 
 ## Supported Lambdas
@@ -36,8 +36,8 @@ class MyLambda implements IHandler<MyQueuedMessage> {
 }
 
 // obviously you need to register all of your stuff
-const container = bootstrap(); 
-// lambduh doesn't depend on containr but it abstracts out the creation of your handler
+const container = bootstrap();
+// triginta doesn't depend on containr but it abstracts out the creation of your handler
 // so that you can easily plug it in (see the `factory` property)
 const lambdaFactory = container.get<ILambdaFactory>();
 

@@ -1,5 +1,5 @@
 {
-  "name": "@dovetailsoftware/lambduh",
+  "name": "@aesop-fables/triginta",
   "version": "0.1.1",
   "description": "A lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.).",
   "type": "commonjs",
@@ -47,7 +47,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/DovetailSoftware/typescript-libraries.git"
+    "url": "git+ssh://git@github.com/aesop-fables/typescript-libraries.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
