@@ -1,5 +1,11 @@
-import { KinesisStreamEvent, Handler, S3Event, S3EventRecord, SQSEvent } from 'aws-lambda';
-import { ILambdaFactory, KinesisLambdaOptions, S3LambdaOptions, SqsLambdaOptions } from './ILambdaFactory';
+import { KinesisStreamEvent, Handler, S3Event, S3EventRecord, SQSEvent, APIGatewayProxyEventV2 } from 'aws-lambda';
+import {
+  HttpLambdaOptions,
+  ILambdaFactory,
+  KinesisLambdaOptions,
+  S3LambdaOptions,
+  SqsLambdaOptions,
+} from './ILambdaFactory';
 
 const isValidJson = (data: string) => {
   try {
@@ -68,6 +74,22 @@ export class LambdaFactory implements ILambdaFactory {
           const request = JSON.parse(record.body) as Message;
           await messageHandler.handle(request, event);
         }
+      };
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
+  createHttpLambda<Message>(options: HttpLambdaOptions<Message>): Handler<APIGatewayProxyEventV2> {
+    try {
+      const messageHandler = options.factory();
+      return async (event: APIGatewayProxyEventV2) => {
+        const { body = '' } = event;
+
+        const request = JSON.parse(body) as Message;
+
+        await messageHandler.handle(request, event);
       };
     } catch (e) {
       console.error(e);

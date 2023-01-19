@@ -51,7 +51,7 @@ describe('LambdaFactory', () => {
 
     test('Test the IHttpEndpoint handler', async () => {
       const handler = new CreateStatusAlertEndpoint();
-      const request: CreateStatusAlertRequest = { 
+      const request: CreateStatusAlertRequest = {
         pk: 'uuid',
         app: 'Agent',
         version: '1.0',
@@ -70,4 +70,4 @@ describe('LambdaFactory', () => {
       expect(handler.request).toStrictEqual(request);
     });
   });
-});  
+});
