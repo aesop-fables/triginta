@@ -42,6 +42,9 @@
     "lib/**/*"
   ],
   "dependencies": {
+    "@aesop-fables/containr": "^0.1.4",
+    "@types/axios": "^0.14.0",
+    "axios": "^1.2.3",
     "jest-mock-extended": "^3.0.1",
     "reflect-metadata": "^0.1.13"
   },
