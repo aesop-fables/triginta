@@ -1,7 +1,5 @@
 import { KinesisStreamEvent, Handler, S3Event, S3EventRecord, SQSEvent, APIGatewayProxyEventV2 } from 'aws-lambda';
 import { ILambdaFactory, KinesisLambdaOptions, S3LambdaOptions, SqsLambdaOptions } from './ILambdaFactory';
-import { IServiceContainer, Newable } from "@aesop-fables/containr";
-import { IHttpEndpoint } from './IHttpEndpoint';
 
 const isValidJson = (data: string) => {
   try {
@@ -76,23 +74,4 @@ export class LambdaFactory implements ILambdaFactory {
       throw e;
     }
   }
-
-  createHttpLambda<ExecuteQueryRequest, ExecuteQueryResults>(lambdaClass: Newable<IHttpEndpoint<ExecuteQueryRequest, ExecuteQueryResults>>, container: IServiceContainer): Handler<APIGatewayProxyEventV2> {
-    return async (event: APIGatewayProxyEventV2) => {
-
-        const endpoint = container.resolve(lambdaClass); 
-    
-        // #2 You need to deserialize the body into the input model
-        const { body } = event;
-
-
-        // #3 You need to execute the endpoint
-        const result: ExecuteQueryResults = await endpoint.execute(body as ExecuteQueryRequest);
-        
-        return {
-          statusCode: 200,
-          body: JSON.stringify(result),
-        };
-    };
-}
 }
