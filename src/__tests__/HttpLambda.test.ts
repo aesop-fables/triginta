@@ -32,7 +32,6 @@ describe('createHttpLambda', () => {
       this.request = request;
       this.event = event;
 
-      console.log(this.request.message);
       return {
         id: '123',
         ...request,
@@ -88,14 +87,12 @@ describe('createHttpLambda', () => {
             throw new Error('Function not implemented.');
           },
         },
-        async (...args: any[]) => {
-          console.log('callback!', args);
-          resolve(args[1]);
+        (error, res) => {
+          resolve(res);
         },
       );
     });
 
-    console.log('response', response);
     expect(response).toEqual({
       id: '123',
       ...request,
