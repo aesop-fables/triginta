@@ -42,7 +42,9 @@
     "lib/**/*"
   ],
   "dependencies": {
+    "@aesop-fables/containr": "^0.1.4",
     "jest-mock-extended": "^3.0.1",
+    "middy": "^0.36.0",
     "reflect-metadata": "^0.1.13"
   },
   "repository": {

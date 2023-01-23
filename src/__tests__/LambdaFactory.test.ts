@@ -28,46 +28,4 @@ describe('LambdaFactory', () => {
       expect(handler.message).toStrictEqual(message);
     });
   });
-
-  describe('createHttpEndpoint', () => {
-    interface CreateStatusAlertRequest {
-      pk: string;
-      app: string;
-      version: string;
-      region: string;
-      message: string;
-      active: boolean;
-    }
-
-    class CreateStatusAlertEndpoint implements IHttpEndpoint<CreateStatusAlertRequest> {
-      request?: CreateStatusAlertRequest;
-      event?: APIGatewayProxyEventV2;
-
-      async handle(request: CreateStatusAlertRequest, event: APIGatewayProxyEventV2): Promise<void> {
-        this.request = request;
-        this.event = event;
-      }
-    }
-
-    test('Test the IHttpEndpoint handler', async () => {
-      const handler = new CreateStatusAlertEndpoint();
-      const request: CreateStatusAlertRequest = {
-        pk: 'uuid',
-        app: 'Agent',
-        version: '1.0',
-        region: 'us-west',
-        message: 'Stop the presses!',
-        active: true,
-      };
-
-      // await runSomeEndpointScenario<CreateStatusAlertRequest>(handler, {
-      //   requests: [request],
-      // });
-
-      // TODO - make a scenario do some actual stuff
-      handler.request = request;
-
-      expect(handler.request).toStrictEqual(request);
-    });
-  });
 });
