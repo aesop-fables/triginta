@@ -1,4 +1,5 @@
 import { createContainer } from '@aesop-fables/containr';
+import { rejects } from 'assert';
 import { APIGatewayProxyEventV2, KinesisStreamEvent } from 'aws-lambda';
 import { IHandler, IHttpEndpoint, runKinesisScenario } from '..';
 import { createHttpLambda, NonNoisyEvent } from '../HttpLambda';
@@ -51,49 +52,51 @@ describe('createHttpLambda', () => {
     const container = createContainer([]);
     const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
 
-    const response = await handler(
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+    const response = await new Promise((resolve) => {
+      handler(
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(request),
+          version: '',
+          routeKey: '',
+          rawPath: '',
+          rawQueryString: '',
+          isBase64Encoded: false,
         },
-        body: JSON.stringify(request),
-        version: '',
-        routeKey: '',
-        rawPath: '',
-        rawQueryString: '',
-        isBase64Encoded: false,
-      },
-      {
-        callbackWaitsForEmptyEventLoop: false,
-        functionName: '',
-        functionVersion: '',
-        invokedFunctionArn: '',
-        memoryLimitInMB: '',
-        awsRequestId: '',
-        logGroupName: '',
-        logStreamName: '',
-        getRemainingTimeInMillis: function (): number {
-          throw new Error('Function not implemented.');
+        {
+          callbackWaitsForEmptyEventLoop: false,
+          functionName: '',
+          functionVersion: '',
+          invokedFunctionArn: '',
+          memoryLimitInMB: '',
+          awsRequestId: '',
+          logGroupName: '',
+          logStreamName: '',
+          getRemainingTimeInMillis: function (): number {
+            throw new Error('Function not implemented.');
+          },
+          done: function (error?: Error | undefined, result?: any): void {
+            throw new Error('Function not implemented.');
+          },
+          fail: function (error: string | Error): void {
+            throw new Error('Function not implemented.');
+          },
+          succeed: function (messageOrObject: any): void {
+            throw new Error('Function not implemented.');
+          },
         },
-        done: function (error?: Error | undefined, result?: any): void {
-          throw new Error('Function not implemented.');
+        async (...args: any[]) => {
+          console.log('callback!', args);
+          resolve(args[1]);
         },
-        fail: function (error: string | Error): void {
-          throw new Error('Function not implemented.');
-        },
-        succeed: function (messageOrObject: any): void {
-          throw new Error('Function not implemented.');
-        },
-      },
-      (res) => {
-        console.log('callback!', res);
-        //   resolve(res);
-      },
-    );
+      );
+    });
 
-    console.log(response);
-    expect(response).toBe({
+    console.log('response', response);
+    expect(response).toEqual({
       id: '123',
       ...request,
     });
