@@ -1,46 +1,58 @@
-import { createContainer } from '@aesop-fables/containr';
-import { rejects } from 'assert';
-import { APIGatewayProxyEventV2, KinesisStreamEvent } from 'aws-lambda';
-import { IHandler, IHttpEndpoint, runKinesisScenario } from '..';
-import { createHttpLambda, NonNoisyEvent } from '../HttpLambda';
+import { createContainer, createServiceModule, inject } from '@aesop-fables/containr';
+import { IHttpEndpoint } from '..';
+import { createHttpLambda, invokeHttpHandler } from '../HttpLambda';
 
-// declare type Shutup = Omit<Handler<APIGatewayProxyEventV2>, 'requestConfig'>
+interface CreateStatusAlertRequest {
+  app: string;
+  version: string;
+  region: string;
+  message: string;
+  active: boolean;
+}
+
+interface StatusAlert {
+  id: string;
+  app: string;
+  version: string;
+  region: string;
+  message: string;
+  active: boolean;
+}
+
+interface IRecorder {
+  record(request: CreateStatusAlertRequest): void;
+}
+
+class Recorder implements IRecorder {
+  request?: CreateStatusAlertRequest;
+  record(request: CreateStatusAlertRequest): void {
+    this.request = request;
+  }
+}
+
+const TestServices = {
+  Recorder: 'recorder',
+};
+
+class CreateStatusAlertEndpoint implements IHttpEndpoint<CreateStatusAlertRequest, StatusAlert> {
+  constructor(@inject(TestServices.Recorder) private readonly recorder: IRecorder) {}
+  async handle(request: CreateStatusAlertRequest): Promise<StatusAlert> {
+    this.recorder.record(request);
+
+    return {
+      id: '123',
+      ...request,
+    };
+  }
+}
+
+const setupCreateHttpLambdaTest = createServiceModule('test', (services) => {
+  services.register(TestServices.Recorder, () => new Recorder());
+});
 
 describe('createHttpLambda', () => {
-  interface CreateStatusAlertRequest {
-    app: string;
-    version: string;
-    region: string;
-    message: string;
-    active: boolean;
-  }
-
-  interface StatusAlert {
-    id: string;
-    app: string;
-    version: string;
-    region: string;
-    message: string;
-    active: boolean;
-  }
-
-  class CreateStatusAlertEndpoint implements IHttpEndpoint<CreateStatusAlertRequest, StatusAlert> {
-    request?: CreateStatusAlertRequest;
-    event?: NonNoisyEvent;
-
-    async handle(request: CreateStatusAlertRequest, event: NonNoisyEvent): Promise<StatusAlert> {
-      this.request = request;
-      this.event = event;
-
-      return {
-        id: '123',
-        ...request,
-      };
-    }
-  }
-
   test('Test the IHttpEndpoint handler', async () => {
-    const request: CreateStatusAlertRequest = {
+    const body: CreateStatusAlertRequest = {
       app: 'Agent',
       version: '1.0',
       region: 'us-west',
@@ -48,54 +60,16 @@ describe('createHttpLambda', () => {
       active: true,
     };
 
-    const container = createContainer([]);
+    const container = createContainer([setupCreateHttpLambdaTest]);
     const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
 
-    const response = await new Promise((resolve) => {
-      handler(
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify(request),
-          version: '',
-          routeKey: '',
-          rawPath: '',
-          rawQueryString: '',
-          isBase64Encoded: false,
-        },
-        {
-          callbackWaitsForEmptyEventLoop: false,
-          functionName: '',
-          functionVersion: '',
-          invokedFunctionArn: '',
-          memoryLimitInMB: '',
-          awsRequestId: '',
-          logGroupName: '',
-          logStreamName: '',
-          getRemainingTimeInMillis: function (): number {
-            throw new Error('Function not implemented.');
-          },
-          done: function (error?: Error | undefined, result?: any): void {
-            throw new Error('Function not implemented.');
-          },
-          fail: function (error: string | Error): void {
-            throw new Error('Function not implemented.');
-          },
-          succeed: function (messageOrObject: any): void {
-            throw new Error('Function not implemented.');
-          },
-        },
-        (error, res) => {
-          resolve(res);
-        },
-      );
-    });
+    const response = await invokeHttpHandler(handler, { body });
+
+    const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
 
     expect(response).toEqual({
       id: '123',
-      ...request,
+      ...recordedRequest,
     });
   });
 });
