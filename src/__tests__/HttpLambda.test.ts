@@ -1,6 +1,8 @@
 import { createContainer, createServiceModule, inject } from '@aesop-fables/containr';
-import { IHttpEndpoint } from '..';
-import { createHttpLambda, invokeHttpHandler } from '../HttpLambda';
+import { IConfiguredRoute, IHttpEndpoint, httpPut, getRoute } from '..';
+import { createHttpLambda, getMiddleware, invokeHttpHandler, useMiddleware } from '../HttpLambda';
+import httpJsonBodyParser from '@middy/http-json-body-parser';
+import middy from '@middy/core';
 
 interface CreateStatusAlertRequest {
   app: string;
@@ -34,6 +36,8 @@ const TestServices = {
   Recorder: 'recorder',
 };
 
+@httpPut('testpath')
+@useMiddleware(httpJsonBodyParser)
 class CreateStatusAlertEndpoint implements IHttpEndpoint<CreateStatusAlertRequest, StatusAlert> {
   constructor(@inject(TestServices.Recorder) private readonly recorder: IRecorder) {}
   async handle(request: CreateStatusAlertRequest): Promise<StatusAlert> {
@@ -63,9 +67,18 @@ describe('createHttpLambda', () => {
     const container = createContainer([setupCreateHttpLambdaTest]);
     const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
 
+    // const middlewareMetadata = getMiddleware(CreateStatusAlertEndpoint);
+    // handler = middy(handler).use(middlewareMetadata?.middleware[0]());
+
+    // expect(middlewareMetadata?.middleware[0]).toEqual(httpJsonBodyParser);
+
     const response = await invokeHttpHandler(handler, { body });
 
     const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
+
+    const endpointMetadata = getRoute(CreateStatusAlertEndpoint);
+
+    expect(endpointMetadata?.route).toEqual('testpath');
 
     expect(response).toEqual({
       id: '123',

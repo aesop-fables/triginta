@@ -11,6 +11,7 @@
   },
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+
   "scripts": {
     "build": "rimraf ./lib && tsc --p ./tsconfig.build.json",
     "format": "prettier --write \"src/**/*.(js|ts)\"",
@@ -44,7 +45,8 @@
   "dependencies": {
     "@aesop-fables/containr": "^0.1.4",
     "jest-mock-extended": "^3.0.1",
-    "middy": "^0.36.0",
+    "@middy/core": "^1.5.2",
+    "@middy/http-json-body-parser": "^1.5.2",
     "reflect-metadata": "^0.1.13"
   },
   "repository": {
