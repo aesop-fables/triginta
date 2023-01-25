@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 export const routes: { [key: string]: IConfiguredRoute } = {};
 
@@ -34,4 +35,19 @@ export function httpDelete(route: string) {
 
 export function httpPost(route: string) {
   return defineEndpointMetadata('post', route);
+}
+
+const middlewareMetadataKey = Symbol('@middlewareMetadataKey');
+
+export function useMiddleware(...args: any[]) {
+  return (target: Object): void => {
+    const params = Reflect.getMetadata(middlewareMetadataKey, target) || [];
+    params.concat(args);
+
+    Reflect.defineMetadata(middlewareMetadataKey, params, target);
+  };
+}
+
+export function getMiddleware(target: any): any[] | undefined {
+  return Reflect.getMetadata(middlewareMetadataKey, target);
 }

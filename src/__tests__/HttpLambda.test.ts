@@ -1,8 +1,9 @@
 import { createContainer, createServiceModule, inject } from '@aesop-fables/containr';
-import { IConfiguredRoute, IHttpEndpoint, httpPut, getRoute } from '..';
-import { createHttpLambda, getMiddleware, invokeHttpHandler, useMiddleware } from '../HttpLambda';
+import { IHttpEndpoint, httpPut, getRoute, errorWrapper, convertNullTo200, xssFilter } from '..';
+import { createHttpLambda, invokeHttpHandler } from '../HttpLambda';
+import { useMiddleware } from '../Decorators';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
-import middy from '@middy/core';
+import httpErrorHanlder from '@middy/http-error-handler';
 
 interface CreateStatusAlertRequest {
   app: string;
@@ -37,7 +38,7 @@ const TestServices = {
 };
 
 @httpPut('testpath')
-@useMiddleware(httpJsonBodyParser)
+@useMiddleware(errorWrapper, httpJsonBodyParser, xssFilter, convertNullTo200, httpErrorHanlder)
 class CreateStatusAlertEndpoint implements IHttpEndpoint<CreateStatusAlertRequest, StatusAlert> {
   constructor(@inject(TestServices.Recorder) private readonly recorder: IRecorder) {}
   async handle(request: CreateStatusAlertRequest): Promise<StatusAlert> {

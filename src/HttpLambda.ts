@@ -10,29 +10,10 @@ import {
   Handler,
 } from 'aws-lambda';
 import middy from '@middy/core';
-import httpJsonBodyParser from '@middy/http-json-body-parser';
 import { IHttpEndpoint } from './IHttpEndpoint';
+import { getMiddleware } from './Decorators';
 
 declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
-
-export interface IConfiguredMiddleware {
-  constructor: Function;
-  middleware: any;
-}
-
-const middlewareMetadataKey = Symbol('@middlewareMetadataKey');
-export function useMiddleware(...args: any[]) {
-  return (target: Object): void => {
-    const params: IConfiguredMiddleware = { middleware: args, constructor: target as Function };
-    Reflect.defineMetadata(middlewareMetadataKey, params, target);
-    // if (args.length && args[0] === 'httpJsonBodyParser') {
-    // }
-  };
-}
-
-export function getMiddleware(target: any): IConfiguredMiddleware | undefined {
-  return Reflect.getMetadata(middlewareMetadataKey, target);
-}
 
 export function createHttpLambda<Input, Output>(
   newable: Newable<IHttpEndpoint<Input, Output>>,
@@ -53,7 +34,7 @@ export function createHttpLambda<Input, Output>(
   if (middlewareMetadata) {
     console.log('use middy');
     let midHandler = middy(handler);
-    middlewareMetadata?.middleware.forEach((midFunc: Function) => {
+    middlewareMetadata.forEach((midFunc: Function) => {
       midHandler = midHandler.use(midFunc());
     });
     return midHandler;

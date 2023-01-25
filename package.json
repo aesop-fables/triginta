@@ -47,7 +47,9 @@
     "jest-mock-extended": "^3.0.1",
     "@middy/core": "^1.5.2",
     "@middy/http-json-body-parser": "^1.5.2",
-    "reflect-metadata": "^0.1.13"
+    "@middy/http-error-handler": "^1.5.2",
+    "reflect-metadata": "^0.1.13",
+    "xss": "^1.0.9"
   },
   "repository": {
     "type": "git",
