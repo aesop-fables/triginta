@@ -55,6 +55,8 @@ const setupCreateHttpLambdaTest = createServiceModule('test', (services) => {
   services.register(TestServices.Recorder, () => new Recorder());
 });
 
+// Ok, this describe/test block essentially served as debugging
+// It's time to turn this into a meaningful set of tests
 describe('createHttpLambda', () => {
   test('Test the IHttpEndpoint handler', async () => {
     const body: CreateStatusAlertRequest = {
