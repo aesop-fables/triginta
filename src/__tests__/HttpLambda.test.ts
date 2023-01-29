@@ -70,11 +70,6 @@ describe('createHttpLambda', () => {
     const container = createContainer([setupCreateHttpLambdaTest]);
     const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
 
-    // const middlewareMetadata = getMiddleware(CreateStatusAlertEndpoint);
-    // handler = middy(handler).use(middlewareMetadata?.middleware[0]());
-
-    // expect(middlewareMetadata?.middleware[0]).toEqual(httpJsonBodyParser);
-
     const response = await invokeHttpHandler(handler, { body });
 
     const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
