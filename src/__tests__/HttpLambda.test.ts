@@ -57,6 +57,14 @@ const setupCreateHttpLambdaTest = createServiceModule('test', (services) => {
 
 // Ok, this describe/test block essentially served as debugging
 // It's time to turn this into a meaningful set of tests
+
+// Step 1: Let's make this file a little easier to read by moving all of the setup stuff
+// into a separate file. Right now it's almost impossible to mentally parse this.
+
+// Step 2: We'll create the test blocks and list out the tests we SHOULD have
+
+// Step 3: We'll actually implement the tests
+
 describe('createHttpLambda', () => {
   test('Test the IHttpEndpoint handler', async () => {
     const body: CreateStatusAlertRequest = {
