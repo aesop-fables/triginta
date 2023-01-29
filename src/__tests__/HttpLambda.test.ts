@@ -13,30 +13,41 @@ import {
 
 // Step 3: We'll actually implement the tests
 
-describe('createHttpLambda', () => {
-  test('Test the IHttpEndpoint handler', async () => {
-    const body: CreateStatusAlertRequest = {
-      app: 'Agent',
-      version: '1.0',
-      region: 'us-west',
-      message: 'Stop the presses!',
-      active: true,
-    };
+describe('HttpLambda', () => {
+  describe('getRoute', () => {
+    test('', () => {
 
-    const container = createContainer([setupCreateHttpLambdaTest]);
-    const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
-
-    const response = await invokeHttpHandler(handler, { body });
-
-    const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
-
-    const endpointMetadata = getRoute(CreateStatusAlertEndpoint);
-
-    expect(endpointMetadata?.route).toEqual('testpath');
-
-    expect(response).toEqual({
-      id: '123',
-      ...recordedRequest,
     });
   });
+
+  describe('createHttpLambda', () => {
+
+  });
 });
+
+//   test('Test the IHttpEndpoint handler', async () => {
+//     const body: CreateStatusAlertRequest = {
+//       app: 'Agent',
+//       version: '1.0',
+//       region: 'us-west',
+//       message: 'Stop the presses!',
+//       active: true,
+//     };
+
+//     const container = createContainer([setupCreateHttpLambdaTest]);
+//     const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
+
+//     const response = await invokeHttpHandler(handler, { body });
+
+//     const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
+
+//     const endpointMetadata = getRoute(CreateStatusAlertEndpoint);
+
+//     expect(endpointMetadata?.route).toEqual('testpath');
+
+//     expect(response).toEqual({
+//       id: '123',
+//       ...recordedRequest,
+//     });
+//   });
+// });

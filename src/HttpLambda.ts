@@ -48,6 +48,7 @@ export interface InvokeHttpHandlerOptions<Request = any> {
   headers?: APIGatewayProxyEventHeaders;
 }
 
+// TODO -- We need to rename this to make it clear that it's for testing ONLY
 export async function invokeHttpHandler<Request, Output>(
   handler: Handler<APIGatewayProxyEventV2, Output>,
   options: InvokeHttpHandlerOptions<Request>,

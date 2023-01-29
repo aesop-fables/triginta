@@ -37,7 +37,11 @@ export function httpPost(route: string) {
   return defineEndpointMetadata('post', route);
 }
 
-const middlewareMetadataKey = Symbol('@middlewareMetadataKey');
+/**
+ * This is exposed internally for testing.
+ * There shouldn't be a need to export this publicly
+ */
+export const middlewareMetadataKey = Symbol('@middlewareMetadataKey');
 
 export function useMiddleware(...args: any[]) {
   return (target: Object): void => {
