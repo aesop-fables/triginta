@@ -1,6 +1,7 @@
 import { createContainer } from '@aesop-fables/containr';
 import { getRoute } from '..';
-import { createHttpLambda, invokeHttpHandler } from '../HttpLambda';
+import { createHttpLambda } from '../HttpLambda';
+import { invokeHttpHandler } from '../invokeHttpHandler';
 import {
   CreateStatusAlertRequest,
   setupCreateHttpLambdaTest,
@@ -13,17 +14,20 @@ import {
 
 // Step 3: We'll actually implement the tests
 
-describe('HttpLambda', () => {
-  describe('getRoute', () => {
-    test('', () => {
-
-    });
+function blah() {
+  await invokeHttpEndpoint({
+    endpoint: CreateStatusAlertEndpoint,
+    payload: {
+      app: 'Agent',
+      version: '1.0',
+      region: 'us-west',
+      message: 'Stop the presses!',
+      active: true,
+    },
   });
+}
 
-  describe('createHttpLambda', () => {
-
-  });
-});
+describe('createHttpLambda', () => {});
 
 //   test('Test the IHttpEndpoint handler', async () => {
 //     const body: CreateStatusAlertRequest = {
