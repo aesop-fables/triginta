@@ -11,7 +11,6 @@
   },
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
-
   "scripts": {
     "build": "rimraf ./lib && tsc --p ./tsconfig.build.json",
     "format": "prettier --write \"src/**/*.(js|ts)\"",
@@ -24,6 +23,7 @@
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
+    "@aesop-fables/containr": "^0.1.5",
     "@types/aws-lambda": "^8.10.109",
     "@types/jest": "^29.2.4",
     "@types/node": "^18.11.11",
@@ -43,7 +43,6 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@aesop-fables/containr": "^0.1.4",
     "jest-mock-extended": "^3.0.1",
     "@middy/core": "^1.5.2",
     "@middy/http-json-body-parser": "^1.5.2",

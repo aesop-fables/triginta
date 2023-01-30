@@ -8,7 +8,7 @@ export interface IConfiguredRoute {
   route: string;
 }
 
-const endpointMetadataKey = Symbol('@endpointMetadataKey');
+export const endpointMetadataKey = Symbol('@endpointMetadataKey');
 
 function defineEndpointMetadata(method: string, route: string) {
   return (target: Object): void => {
@@ -45,8 +45,8 @@ export const middlewareMetadataKey = Symbol('@middlewareMetadataKey');
 
 export function useMiddleware(...args: any[]) {
   return (target: Object): void => {
-    const params = Reflect.getMetadata(middlewareMetadataKey, target) || [];
-    params.concat(args);
+    let params = Reflect.getMetadata(middlewareMetadataKey, target) || [];
+    params = params.concat(args);
 
     Reflect.defineMetadata(middlewareMetadataKey, params, target);
   };
