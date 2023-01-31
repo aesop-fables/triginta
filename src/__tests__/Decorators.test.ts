@@ -1,16 +1,28 @@
-import { any } from "jest-mock-extended";
-import { getRoute, IConfiguredRoute, endpointMetadataKey, httpGet, middlewareMetadataKey, getMiddleware, useMiddleware, httpPost, httpPut, httpDelete } from "../Decorators";
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  getRoute,
+  IConfiguredRoute,
+  endpointMetadataKey,
+  httpGet,
+  middlewareMetadataKey,
+  getMiddleware,
+  useMiddleware,
+  httpPost,
+  httpPut,
+  httpDelete,
+} from '../Decorators';
 import 'reflect-metadata';
-import { IHttpEndpoint } from "../IHttpEndpoint";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 describe('Decorators', () => {
   describe('routing', () => {
     test('getRoute', () => {
-      const target = () => {};
-      const route = "testRoute";
-      const method = "testMethod";
-      const params: IConfiguredRoute = { method, route, constructor: target as Function};
+      const target = () => {
+        return null;
+      };
+      const route = 'testRoute';
+      const method = 'testMethod';
+      const params: IConfiguredRoute = { method, route, constructor: target as Function };
       Reflect.defineMetadata(endpointMetadataKey, params, target);
       expect(getRoute(target as Function)).toBe(Reflect.getMetadata(endpointMetadataKey, target));
     });
@@ -19,66 +31,68 @@ describe('Decorators', () => {
     // the proper verb/method is getting registered (easy to screw up w/ a bad copy/paste when we're writing stuff fast)
     describe('routing helpers register the correct path/verb', () => {
       test('httpGet', () => {
-        const route = "testGet";
+        const route = 'testGet';
 
         @httpGet(route)
-        class HttpGetTestEndpoint{}
+        class HttpGetTestEndpoint {}
 
         const actual = getRoute(HttpGetTestEndpoint);
         expect(actual?.route).toBe(route);
-        expect(actual?.method).toBe("get");
-        });
+        expect(actual?.method).toBe('get');
+      });
 
       test('httpPost', () => {
-        const route = "testPost";
+        const route = 'testPost';
 
         @httpPost(route)
-        class HttpPostTestEndpoint{}
+        class HttpPostTestEndpoint {}
 
         const actual = getRoute(HttpPostTestEndpoint);
         expect(actual?.route).toBe(route);
-        expect(actual?.method).toBe("post");
+        expect(actual?.method).toBe('post');
       });
 
       test('httpPut', () => {
-        const route = "testPut";
+        const route = 'testPut';
 
         @httpPut(route)
-        class HttpPutTestEndpoint{}
+        class HttpPutTestEndpoint {}
 
         const actual = getRoute(HttpPutTestEndpoint);
         expect(actual?.route).toBe(route);
-        expect(actual?.method).toBe("put");
+        expect(actual?.method).toBe('put');
       });
 
       test('httpDelete', () => {
-        const route = "testDelete";
+        const route = 'testDelete';
 
         @httpDelete(route)
-        class HttpDeleteTestEndpoint{}
+        class HttpDeleteTestEndpoint {}
 
         const actual = getRoute(HttpDeleteTestEndpoint);
         expect(actual?.route).toBe(route);
-        expect(actual?.method).toBe("delete");
+        expect(actual?.method).toBe('delete');
       });
     });
   });
 
   describe('middlware', () => {
     test('getMiddleware', () => {
-    const target = {targetname : "target"};
+      const target = { targetname: 'target' };
 
-    Reflect.defineMetadata(middlewareMetadataKey, target, target);
+      Reflect.defineMetadata(middlewareMetadataKey, target, target);
 
-    expect(getMiddleware(target)).toBe(target);
+      expect(getMiddleware(target)).toBe(target);
     });
 
     describe('useMiddleware', () => {
       test('registers a single middleware', () => {
-        function testMiddy(){};
+        function testMiddy() {
+          return null;
+        }
 
         @useMiddleware(testMiddy)
-        class TestingUseMiddlewareDecorator{}
+        class TestingUseMiddlewareDecorator {}
 
         const actual = getMiddleware(TestingUseMiddlewareDecorator) as any[];
 
@@ -86,11 +100,15 @@ describe('Decorators', () => {
       });
 
       test('registers multiple middleware in a single call', () => {
-        function testMiddy1(){};
-        function testMiddy2(){};
+        function testMiddy1() {
+          return null;
+        }
+        function testMiddy2() {
+          return null;
+        }
 
         @useMiddleware(testMiddy1, testMiddy2)
-        class TestingUseMiddlewareDecorator{}
+        class TestingUseMiddlewareDecorator {}
 
         const actual = getMiddleware(TestingUseMiddlewareDecorator) as any[];
 
@@ -99,14 +117,22 @@ describe('Decorators', () => {
 
       // Slack convo about this one: https://dovetailsoftware.slack.com/archives/C04FG3C8S73/p1674666471767919
       test('registers multiple middleware in multiple calls', () => {
-        function testMiddy1(){};
-        function testMiddy2(){};
-        function testMiddy3(){};
-        function testMiddy4(){};
+        function testMiddy1() {
+          return null;
+        }
+        function testMiddy2() {
+          return null;
+        }
+        function testMiddy3() {
+          return null;
+        }
+        function testMiddy4() {
+          return null;
+        }
 
         @useMiddleware(testMiddy1, testMiddy2)
         @useMiddleware(testMiddy3, testMiddy4)
-        class TestingUseMiddlewareDecorator{}
+        class TestingUseMiddlewareDecorator {}
 
         const actual = getMiddleware(TestingUseMiddlewareDecorator) as any[];
 
