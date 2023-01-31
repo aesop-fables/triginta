@@ -1,5 +1,5 @@
-import { APIGatewayProxyEventV2, KinesisStreamEvent } from 'aws-lambda';
-import { IHandler, IHttpEndpoint, runKinesisScenario } from '..';
+import { KinesisStreamEvent } from 'aws-lambda';
+import { IHandler, runKinesisScenario } from '..';
 
 describe('LambdaFactory', () => {
   describe('createKinesisLambda', () => {

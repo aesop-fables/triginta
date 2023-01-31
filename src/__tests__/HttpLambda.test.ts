@@ -27,7 +27,52 @@ function blah() {
   });
 }
 
-describe('createHttpLambda', () => {});
+describe('createHttpLambda', () => {
+  describe('get', () => {
+    test('using single middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware with multiple calls', () => {
+      throw new Error('Not Yet Implemented');
+    });
+  });
+  describe('put', () => {
+    test('using single middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware with multiple calls', () => {
+      throw new Error('Not Yet Implemented');
+    });
+  });
+  describe('post', () => {
+    test('using single middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware with multiple calls', () => {
+      throw new Error('Not Yet Implemented');
+    });
+  });
+  describe('delete', () => {
+    test('using single middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware', () => {
+      throw new Error('Not Yet Implemented');
+    });
+    test('using multiple middleware with multiple calls', () => {
+      throw new Error('Not Yet Implemented');
+    });
+  });
+});
 
 //   test('Test the IHttpEndpoint handler', async () => {
 //     const body: CreateStatusAlertRequest = {
