@@ -1,78 +1,106 @@
-import { createContainer } from '@aesop-fables/containr';
-import { getRoute } from '..';
-import { createHttpLambda } from '../HttpLambda';
+import 'reflect-metadata';
+import { createContainer, createServiceModule, IServiceContainer, Newable } from '@aesop-fables/containr';
+import { APIGatewayProxyEventV2, Handler } from 'aws-lambda';
+import { getRoute, httpGet, IHttpEndpoint } from '..';
+import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory } from '../HttpLambda';
 import { invokeHttpHandler } from '../invokeHttpHandler';
-import {
-  CreateStatusAlertRequest,
-  setupCreateHttpLambdaTest,
-  CreateStatusAlertEndpoint,
-  Recorder,
-  TestServices,
-} from './common';
+import { HttpLambdaServices } from '../HttpLambdaServices';
 
-// Step 2: We'll create the test blocks and list out the tests we SHOULD have
+interface InitializeRequest {}
 
-// Step 3: We'll actually implement the tests
-
-function blah() {
-  await invokeHttpEndpoint({
-    endpoint: CreateStatusAlertEndpoint,
-    payload: {
-      app: 'Agent',
-      version: '1.0',
-      region: 'us-west',
-      message: 'Stop the presses!',
-      active: true,
-    },
-  });
+@httpGet('/http-lambda/initialize')
+class InitializeEndpoint implements IHttpEndpoint<InitializeRequest, string> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async handle(message: InitializeRequest, event: APIGatewayProxyEventV2): Promise<string> {
+    return 'Hello!';
+  }
 }
 
-describe('createHttpLambda', () => {
-  describe('get', () => {
-    test('using single middleware', () => {
-      throw new Error('Not Yet Implemented');
+describe('HttpLambda', () => {
+  describe('initialize', () => {
+    it('no service modules', async () => {
+      const { createHttpLambda } = HttpLambda.initialize();
+      const handler = createHttpLambda(InitializeEndpoint);
+      const response = await invokeHttpHandler(handler, {});
+
+      expect(response).toBe('Hello!');
     });
-    test('using multiple middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware with multiple calls', () => {
-      throw new Error('Not Yet Implemented');
-    });
-  });
-  describe('put', () => {
-    test('using single middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware with multiple calls', () => {
-      throw new Error('Not Yet Implemented');
-    });
-  });
-  describe('post', () => {
-    test('using single middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware with multiple calls', () => {
-      throw new Error('Not Yet Implemented');
-    });
-  });
-  describe('delete', () => {
-    test('using single middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware', () => {
-      throw new Error('Not Yet Implemented');
-    });
-    test('using multiple middleware with multiple calls', () => {
-      throw new Error('Not Yet Implemented');
+
+    test('override IHttpLambdaFactory', async () => {
+      class CustomHttpLambdaFactory implements IHttpLambdaFactory {
+        constructor(private readonly inner: IHttpLambdaFactory) {}
+        createHandler<Input, Output>(
+          newable: Newable<IHttpEndpoint<Input, Output>>,
+        ): Handler<APIGatewayProxyEventV2, Output> {
+          const inner = this.inner.createHandler(newable);
+          return async (event, context, callback) => {
+            const response = (await inner(event, context, callback)) as Output;
+            return `${response} WORLD` as Output;
+          };
+        }
+      }
+
+      const useCustomFactory = createServiceModule('customHttpLambdaFactory', (services) => {
+        services.register<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory, (container) => {
+          const inner = new HttpLambdaFactory(container);
+          return new CustomHttpLambdaFactory(inner);
+        });
+      });
+      const { createHttpLambda } = HttpLambda.initialize([useCustomFactory]);
+      const handler = createHttpLambda(InitializeEndpoint);
+      const response = await invokeHttpHandler(handler, {});
+
+      expect(response).toBe('Hello! WORLD');
     });
   });
 });
+
+// describe('createHttpLambda', () => {
+//   describe('get', () => {
+//     test('using single middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware with multiple calls', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//   });
+//   describe('put', () => {
+//     test('using single middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware with multiple calls', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//   });
+//   describe('post', () => {
+//     test('using single middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware with multiple calls', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//   });
+//   describe('delete', () => {
+//     test('using single middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//     test('using multiple middleware with multiple calls', () => {
+//       throw new Error('Not Yet Implemented');
+//     });
+//   });
+// });
 
 //   test('Test the IHttpEndpoint handler', async () => {
 //     const body: CreateStatusAlertRequest = {

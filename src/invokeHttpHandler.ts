@@ -20,42 +20,42 @@ export async function invokeHttpHandler<Request, Output>(
     'Content-Type': 'application/json',
     Accept: 'application/json',
   };
-  return new Promise<Output>((resolve) => {
-    configuredHandler(
-      {
-        headers,
-        body: options.body ? JSON.stringify(options.body ?? {}) : undefined,
-        version: '',
-        routeKey: '',
-        rawPath: '',
-        rawQueryString: '',
-        isBase64Encoded: false,
+
+  return configuredHandler(
+    {
+      headers,
+      body: options.body ? JSON.stringify(options.body ?? {}) : undefined,
+      version: '',
+      routeKey: '',
+      rawPath: '',
+      rawQueryString: '',
+      isBase64Encoded: false,
+    },
+    {
+      callbackWaitsForEmptyEventLoop: false,
+      functionName: '',
+      functionVersion: '',
+      invokedFunctionArn: '',
+      memoryLimitInMB: '',
+      awsRequestId: '',
+      logGroupName: '',
+      logStreamName: '',
+      getRemainingTimeInMillis: function (): number {
+        throw new Error('Function not implemented.');
       },
-      {
-        callbackWaitsForEmptyEventLoop: false,
-        functionName: '',
-        functionVersion: '',
-        invokedFunctionArn: '',
-        memoryLimitInMB: '',
-        awsRequestId: '',
-        logGroupName: '',
-        logStreamName: '',
-        getRemainingTimeInMillis: function (): number {
-          throw new Error('Function not implemented.');
-        },
-        done: function (error?: Error | undefined, result?: any): void {
-          throw new Error('Function not implemented.');
-        },
-        fail: function (error: string | Error): void {
-          throw new Error('Function not implemented.');
-        },
-        succeed: function (messageOrObject: any): void {
-          throw new Error('Function not implemented.');
-        },
+      done: function (error?: Error | undefined, result?: any): void {
+        throw new Error('Function not implemented.');
       },
-      (error, res) => {
-        resolve(res as Output);
+      fail: function (error: string | Error): void {
+        throw new Error('Function not implemented.');
       },
-    );
-  });
+      succeed: function (messageOrObject: any): void {
+        throw new Error('Function not implemented.');
+      },
+    },
+    () => {
+      // no-op
+      throw new Error('Not supported');
+    },
+  ) as Promise<Output>;
 }
