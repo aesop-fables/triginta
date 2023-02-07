@@ -1,18 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { IConfiguredRoute } from './IConfiguredRoute';
+import RouteRegistry from './RouteRegistry';
+
 /* eslint-disable @typescript-eslint/ban-types */
-
-export interface IConfiguredRoute {
-  constructor: Function;
-  method: string;
-  route: string;
-}
-
 export const endpointMetadataKey = Symbol('@endpointMetadataKey');
 
 function defineEndpointMetadata(method: string, route: string) {
   return (target: Object): void => {
     const params: IConfiguredRoute = { method, route, constructor: target as Function };
     Reflect.defineMetadata(endpointMetadataKey, params, target);
+    RouteRegistry.register(params);
   };
 }
 

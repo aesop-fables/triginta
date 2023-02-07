@@ -6,12 +6,12 @@ import {
   APIGatewayProxyEventV2,
   Handler,
 } from 'aws-lambda';
-import { IConfiguredRoute } from './Decorators';
 import { HttpLambda, IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
 import queryString from 'node:querystring';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { Newable } from '@aesop-fables/containr';
 import { IHttpEndpoint } from './IHttpEndpoint';
+import { IConfiguredRoute } from './IConfiguredRoute';
 
 export interface InvocationContext {
   configuredRoute: IConfiguredRoute;

@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   getRoute,
-  IConfiguredRoute,
   endpointMetadataKey,
   httpGet,
   middlewareMetadataKey,
@@ -13,6 +12,7 @@ import {
   httpDelete,
 } from '../Decorators';
 import 'reflect-metadata';
+import { IConfiguredRoute } from '../IConfiguredRoute';
 
 describe('Decorators', () => {
   describe('routing', () => {
