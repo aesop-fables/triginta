@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { createServiceModule, Newable } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, Handler } from 'aws-lambda';
-import { httpGet, IHttpEndpoint } from '..';
+import { getRoute, httpGet, IConfiguredRoute, IHttpEndpoint } from '..';
 import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory } from '../HttpLambda';
 import { invokeHttpHandler } from '../invokeHttpHandler';
 import { HttpLambdaServices } from '../HttpLambdaServices';
@@ -19,9 +19,11 @@ class InitializeEndpoint implements IHttpEndpoint<InitializeRequest, string> {
 describe('HttpLambda', () => {
   describe('initialize', () => {
     test('no service modules', async () => {
-      const { createHttpLambda } = HttpLambda.initialize();
-      const handler = createHttpLambda(InitializeEndpoint);
-      const response = await invokeHttpHandler(handler, {});
+      HttpLambda.initialize();
+      const response = await invokeHttpHandler({
+        configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
+        path: '/http-lambda/initialize',
+      });
 
       expect(response).toBe('Hello!');
     });
@@ -46,9 +48,12 @@ describe('HttpLambda', () => {
           return new CustomHttpLambdaFactory(inner);
         });
       });
-      const { createHttpLambda } = HttpLambda.initialize([useCustomFactory]);
-      const handler = createHttpLambda(InitializeEndpoint);
-      const response = await invokeHttpHandler(handler, {});
+
+      HttpLambda.initialize([useCustomFactory]);
+      const response = await invokeHttpHandler({
+        configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
+        path: '/http-lambda/initialize',
+      });
 
       expect(response).toBe('Hello! WORLD');
     });

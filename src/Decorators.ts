@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
-export const routes: { [key: string]: IConfiguredRoute } = {};
 
 export interface IConfiguredRoute {
   constructor: Function;
