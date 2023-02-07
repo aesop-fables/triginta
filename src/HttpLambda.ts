@@ -21,18 +21,6 @@ import { HttpLambdaServices } from './HttpLambdaServices';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
-// I'm leaning towards adopting a pattern where bootstrap.ts looks like:
-// const { container, createHttpLambda } = HttpLambda.initialize([]);
-// export { container, createHttpLambda };
-
-// Ok, after the comment below and the pattern I'm leaning towards...
-// I think it'll work like this:
-
-// 1. Initialize a container (allow people to pass in service modules)
-// 2. Resolve an instance of IHttpLambdaFactory
-// 3. Use that to create the handler function itself (const handler = async(event))
-// 4. Return a curried function: createHttpLambda
-
 export interface BootstrappedHttpLambdaContext {
   createHttpLambda<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output>>,
@@ -40,7 +28,6 @@ export interface BootstrappedHttpLambdaContext {
 }
 
 export interface IHttpLambdaFactory {
-  // Need to expose a way to create the handler
   // When we create the child container, do we need to be able to inject stuff?
   // e.g., "inject the current event for nested dependencies to have context" <-- This might be a "do it if/when we need it" kind of thing.
   createHandler<Input, Output>(newable: Newable<IHttpEndpoint<Input, Output>>): Handler<APIGatewayProxyEventV2, Output>;

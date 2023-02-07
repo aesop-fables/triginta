@@ -1,7 +1,7 @@
 import 'reflect-metadata';
-import { createContainer, createServiceModule, IServiceContainer, Newable } from '@aesop-fables/containr';
+import { createServiceModule, Newable } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, Handler } from 'aws-lambda';
-import { getRoute, httpGet, IHttpEndpoint } from '..';
+import { httpGet, IHttpEndpoint } from '..';
 import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory } from '../HttpLambda';
 import { invokeHttpHandler } from '../invokeHttpHandler';
 import { HttpLambdaServices } from '../HttpLambdaServices';
