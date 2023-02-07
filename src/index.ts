@@ -1,8 +1,11 @@
 import { IHandler } from './IHandler';
 import { IHttpEndpoint } from './IHttpEndpoint';
-import { ILambdaFactory } from './ILambdaFactory';
-import { LambdaFactory } from './LambdaFactory';
 
-export { IHandler, IHttpEndpoint, ILambdaFactory, LambdaFactory };
+export * from './Decorators';
+export * from './Middleware';
+export * from './HttpLambda';
+export * from './HttpLambdaServices';
+export * from './RouteRegistry';
+export * from './invokeHttpHandler';
 
-export { runKinesisScenario } from './Scenarios';
+export { IHandler, IHttpEndpoint };
