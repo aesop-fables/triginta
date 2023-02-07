@@ -18,7 +18,7 @@ class InitializeEndpoint implements IHttpEndpoint<InitializeRequest, string> {
 
 describe('HttpLambda', () => {
   describe('initialize', () => {
-    it('no service modules', async () => {
+    test('no service modules', async () => {
       const { createHttpLambda } = HttpLambda.initialize();
       const handler = createHttpLambda(InitializeEndpoint);
       const response = await invokeHttpHandler(handler, {});
@@ -54,77 +54,3 @@ describe('HttpLambda', () => {
     });
   });
 });
-
-// describe('createHttpLambda', () => {
-//   describe('get', () => {
-//     test('using single middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware with multiple calls', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//   });
-//   describe('put', () => {
-//     test('using single middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware with multiple calls', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//   });
-//   describe('post', () => {
-//     test('using single middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware with multiple calls', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//   });
-//   describe('delete', () => {
-//     test('using single middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//     test('using multiple middleware with multiple calls', () => {
-//       throw new Error('Not Yet Implemented');
-//     });
-//   });
-// });
-
-//   test('Test the IHttpEndpoint handler', async () => {
-//     const body: CreateStatusAlertRequest = {
-//       app: 'Agent',
-//       version: '1.0',
-//       region: 'us-west',
-//       message: 'Stop the presses!',
-//       active: true,
-//     };
-
-//     const container = createContainer([setupCreateHttpLambdaTest]);
-//     const handler = createHttpLambda(CreateStatusAlertEndpoint, container);
-
-//     const response = await invokeHttpHandler(handler, { body });
-
-//     const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
-
-//     const endpointMetadata = getRoute(CreateStatusAlertEndpoint);
-
-//     expect(endpointMetadata?.route).toEqual('testpath');
-
-//     expect(response).toEqual({
-//       id: '123',
-//       ...recordedRequest,
-//     });
-//   });
-// });

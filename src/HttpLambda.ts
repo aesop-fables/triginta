@@ -39,15 +39,26 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
     newable: Newable<IHttpEndpoint<Input, Output>>,
   ): Handler<APIGatewayProxyEventV2, Output> {
     const handler = async (event: NonNoisyEvent) => {
-      const endpoint = this.container.resolve(newable);
-      const { body: request } = event;
+      const childContainer = this.container.createChildContainer('httpLambda');
+      try {
+        const endpoint = this.container.resolve(newable);
+        const { body: request } = event;
 
-      const response = (await endpoint.handle(
-        request as Input,
-        event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
-      )) as Output;
+        const response = (await endpoint.handle(
+          request as Input,
+          event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+        )) as Output;
 
-      return response;
+        return response;
+      } finally {
+        if (childContainer) {
+          try {
+            childContainer.dispose();
+          } catch {
+            // no-op
+          }
+        }
+      }
     };
 
     const middlewareMetadata = getMiddleware(newable);
