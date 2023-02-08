@@ -4,11 +4,6 @@
 
 module.exports = {
   preset: 'ts-jest/presets/js-with-ts',
-  globals: {
-    'ts-jest': {
-      tsconfig: './configs/tsconfig.spec.json',
-    },
-  },
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
