@@ -45,7 +45,7 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@middy/core": "^1.5.2",
+    "@middy/core": "^4.2.3",
     "@middy/http-error-handler": "^1.5.2",
     "@middy/http-json-body-parser": "^1.5.2",
     "reflect-metadata": "^0.1.13",
