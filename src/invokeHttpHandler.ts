@@ -97,7 +97,7 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
       accept: '*/*',
       'accept-encoding': 'gzip, deflate, br',
       // 'content-length': '0',
-      // 'content-type': 'application/json',
+      'content-type': 'application/json',
       host: '',
       'user-agent': 'triginta/1.0',
       'x-amzn-trace-id': 'Root=1-63e26f79-577a8db87d3b31fa4da65566',
@@ -149,7 +149,7 @@ export async function invokeHttpHandler<Output>(context: InvocationContext): Pro
       logGroupName: 'test-group',
       logStreamName: 'test-stream',
       getRemainingTimeInMillis: function (): number {
-        throw new Error('Function not implemented.');
+        return 1000;
       },
       done: function (error?: Error | undefined, result?: any): void {
         throw new Error('Function not implemented.');

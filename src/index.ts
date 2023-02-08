@@ -7,5 +7,6 @@ export * from './HttpLambda';
 export * from './HttpLambdaServices';
 export { default as RouteRegistry } from './RouteRegistry';
 export * from './invokeHttpHandler';
+export * from './IConfiguredRoute';
 
 export { IHandler, IHttpEndpoint };
