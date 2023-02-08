@@ -9,12 +9,13 @@ import {
 import { HttpLambda, IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
 import queryString from 'node:querystring';
 import { HttpLambdaServices } from './HttpLambdaServices';
-import { Newable } from '@aesop-fables/containr';
+import { IServiceContainer, Newable } from '@aesop-fables/containr';
 import { IHttpEndpoint } from './IHttpEndpoint';
 import { IConfiguredRoute } from './IConfiguredRoute';
 
 export interface InvocationContext {
   configuredRoute: IConfiguredRoute;
+  container: IServiceContainer;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any;
   path: string;
@@ -67,7 +68,7 @@ export function parseRouteParams(route: string, path: string): APIGatewayProxyEv
   return params;
 }
 
-export function parsePathParameters(context: InvocationContext): Partial<APIGatewayProxyEventV2> {
+export function parsePathParameters(context: EventGenerationContext): Partial<APIGatewayProxyEventV2> {
   const { path } = context;
   let queryStringParameters = {};
   if (path.indexOf('?') !== -1) {
@@ -84,7 +85,9 @@ export function parsePathParameters(context: InvocationContext): Partial<APIGate
   };
 }
 
-export function createApiGatewayEvent(context: InvocationContext): Partial<APIGatewayProxyEventV2> {
+export declare type EventGenerationContext = Omit<InvocationContext, 'container'>;
+
+export function createApiGatewayEvent(context: EventGenerationContext): Partial<APIGatewayProxyEventV2> {
   const { configuredRoute, path, body } = context;
   const routeKey = `${configuredRoute.method} ${configuredRoute.route}`;
   const event: Partial<APIGatewayProxyEventV2> = {
@@ -128,7 +131,7 @@ export function createApiGatewayEvent(context: InvocationContext): Partial<APIGa
 
 // TODO -- We need to rename this to make it clear that it's for testing ONLY
 export async function invokeHttpHandler<Output>(context: InvocationContext): Promise<Output> {
-  const container = HttpLambda.getContainer();
+  const { container } = context;
   const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
   const configuredHandler = factory.createHandler(
     context.configuredRoute.constructor as Newable<IHttpEndpoint<any, any>>,

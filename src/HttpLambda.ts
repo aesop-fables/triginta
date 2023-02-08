@@ -82,6 +82,7 @@ export const useTrigintaHttp = createServiceModule('triginta/http', (services) =
 });
 
 let _currentContainer: IServiceContainer | undefined;
+
 export class HttpLambda {
   static initialize(modules: IServiceModule[] = []): BootstrappedHttpLambdaContext {
     const container = createContainer([useTrigintaHttp, ...modules]);

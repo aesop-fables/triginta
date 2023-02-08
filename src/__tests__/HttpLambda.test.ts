@@ -23,6 +23,7 @@ describe('HttpLambda', () => {
       HttpLambda.initialize();
       const response = await invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
+        container: HttpLambda.getContainer(),
         path: '/http-lambda/initialize',
       });
 
@@ -53,6 +54,7 @@ describe('HttpLambda', () => {
       HttpLambda.initialize([useCustomFactory]);
       const response = await invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
+        container: HttpLambda.getContainer(),
         path: '/http-lambda/initialize',
       });
 
