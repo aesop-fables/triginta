@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { createServiceModule, Newable } from '@aesop-fables/containr';
-import { APIGatewayProxyEventV2, Handler } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
 import { getRoute, httpGet, IHttpEndpoint } from '..';
 import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory } from '../HttpLambda';
 import { invokeHttpHandler } from '../invokeHttpHandler';
@@ -27,7 +27,7 @@ describe('HttpLambda', () => {
         path: '/http-lambda/initialize',
       });
 
-      expect(response).toBe('Hello!');
+      expect(response.body).toBe('"Hello!"');
     });
 
     test('override IHttpLambdaFactory', async () => {
@@ -35,11 +35,14 @@ describe('HttpLambda', () => {
         constructor(private readonly inner: IHttpLambdaFactory) {}
         createHandler<Input, Output>(
           newable: Newable<IHttpEndpoint<Input, Output>>,
-        ): Handler<APIGatewayProxyEventV2, Output> {
+        ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
           const inner = this.inner.createHandler(newable);
           return async (event, context, callback) => {
-            const response = (await inner(event, context, callback)) as Output;
-            return `${response} WORLD` as Output;
+            const response = (await inner(event, context, callback)) as APIGatewayProxyStructuredResultV2;
+            return {
+              ...response,
+              body: `Hello, World!`,
+            };
           };
         }
       }
@@ -58,7 +61,7 @@ describe('HttpLambda', () => {
         path: '/http-lambda/initialize',
       });
 
-      expect(response).toBe('Hello! WORLD');
+      expect(response.body).toBe('Hello, World!');
     });
   });
 });

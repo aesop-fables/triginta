@@ -87,9 +87,11 @@ describe('createHttpLambda', () => {
     expect(endpointMetadata?.route).toEqual('testpath');
 
     const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
-    expect(response).toEqual({
-      id: '123',
-      ...recordedRequest,
-    });
+    expect(response.body).toEqual(
+      JSON.stringify({
+        id: '123',
+        ...recordedRequest,
+      }),
+    );
   });
 });

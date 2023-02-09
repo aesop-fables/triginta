@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
-import { getRoute, HttpLambda, IConfiguredRoute, IHttpEndpoint, useMiddleware } from '..';
+import { HttpLambda, IHttpEndpoint, useMiddleware } from '..';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { parsePathParameters, createApiGatewayEvent, invokeHttpHandler } from '../invokeHttpHandler';
 import jsonBodyParser from '@middy/http-json-body-parser';
@@ -22,7 +22,6 @@ interface ParsingRequest {
 class ParsingTestEndpoint implements IHttpEndpoint<ParsingRequest, void> {
   constructor(@inject(RECORDER_KEY) private readonly events: IEndpointRecorder) {}
   async handle(message: ParsingRequest, event: APIGatewayProxyEventV2): Promise<void> {
-    console.log(message);
     this.events.recordEvent(event);
     this.events.recordRequest(message);
   }
