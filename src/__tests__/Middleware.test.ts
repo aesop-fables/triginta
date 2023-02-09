@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { IHttpEndpoint, httpPut, getRoute, invokeHttpHandler } from '..';
 import { HttpLambda } from '../HttpLambda';
@@ -68,18 +70,11 @@ describe('createHttpLambda', () => {
       active: true,
     };
 
-    // const { createHttpLambda } = HttpLambda.initialize([setupCreateHttpLambdaTest]);
     HttpLambda.initialize([setupCreateHttpLambdaTest]);
     const container = HttpLambda.getContainer();
 
-    // const container = HttpLambda.getContainer();
-    // const container = createContainer([setupCreateHttpLambdaTest]);
-    // const handler = createHttpLambda(CreateStatusAlertEndpoint);
-
-    const middlewareMetadata = getMiddleware(CreateStatusAlertEndpoint);
-    // handler = middy(handler).use(middlewareMetadata?.middleware[0]());
-
-    expect(middlewareMetadata ? middlewareMetadata[0] : '').toEqual(httpJsonBodyParser);
+    const middlewareMetadata = getMiddleware(CreateStatusAlertEndpoint) as any[];
+    expect(middlewareMetadata[0]).toEqual(httpJsonBodyParser);
 
     const response = await invokeHttpHandler({
       configuredRoute: getRoute(CreateStatusAlertEndpoint) as IConfiguredRoute,
@@ -87,16 +82,11 @@ describe('createHttpLambda', () => {
       body,
       path: 'testpath',
     });
-    // console.log('response', response);
 
-    const endpointMetadata = getRoute(CreateStatusAlertEndpoint);
-    // console.log('endpointMetadata', endpointMetadata);
-
+    const endpointMetadata = getRoute(CreateStatusAlertEndpoint) as IConfiguredRoute;
     expect(endpointMetadata?.route).toEqual('testpath');
 
     const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
-    // console.log('recordedRequest', recordedRequest);
-
     expect(response).toEqual({
       id: '123',
       ...recordedRequest,
