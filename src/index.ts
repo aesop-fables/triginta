@@ -8,5 +8,6 @@ export * from './HttpLambdaServices';
 export { default as RouteRegistry } from './RouteRegistry';
 export * from './invokeHttpHandler';
 export * from './IConfiguredRoute';
+export * from './TrigintaConfig';
 
 export { IHandler, IHttpEndpoint };
