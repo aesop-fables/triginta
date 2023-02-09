@@ -1,22 +1,29 @@
 import 'reflect-metadata';
-import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { IHttpEndpoint } from '..';
-import { inject } from '@aesop-fables/containr';
-import { parsePathParameters, createApiGatewayEvent } from '../invokeHttpHandler';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
+import { HttpLambda, IHttpEndpoint, useMiddleware } from '..';
+import { createServiceModule, inject } from '@aesop-fables/containr';
+import { parsePathParameters, createApiGatewayEvent, invokeHttpHandler } from '../invokeHttpHandler';
+import jsonBodyParser from '@middy/http-json-body-parser';
 
 const RECORDER_KEY = 'eventRecorder';
 
-interface IEventRecorder {
-  record(event: APIGatewayProxyEventV2): void;
+interface IEndpointRecorder {
+  recordEvent(event: APIGatewayProxyEventV2): void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  recordRequest(request: any): void;
 }
 
-interface ParsingRequest {}
+interface ParsingRequest {
+  foo: string;
+  bar: string;
+}
 
+@useMiddleware(jsonBodyParser)
 class ParsingTestEndpoint implements IHttpEndpoint<ParsingRequest, void> {
-  constructor(@inject(RECORDER_KEY) private readonly events: IEventRecorder) {}
+  constructor(@inject(RECORDER_KEY) private readonly events: IEndpointRecorder) {}
   async handle(message: ParsingRequest, event: APIGatewayProxyEventV2): Promise<void> {
-    console.log(message);
-    this.events.record(event);
+    this.events.recordEvent(event);
+    this.events.recordRequest(message);
   }
 }
 
@@ -170,5 +177,49 @@ describe('createApiGatewayEvent', () => {
     });
 
     expect(event.body).toEqual(`{\"foo\":\"bar\",\"bar\":\"foo\"}`);
+  });
+});
+
+describe('invokeHttpHandler', () => {
+  describe('middyified handlers', () => {
+    it('test the json parsing middleware', async () => {
+      const events: APIGatewayProxyEventV2[] = [];
+      const messages: any[] = [];
+
+      HttpLambda.initialize([
+        createServiceModule('test', (services) => {
+          services.register<IEndpointRecorder>(RECORDER_KEY, {
+            recordEvent(event) {
+              events.push(event);
+            },
+            recordRequest(request) {
+              messages.push(request);
+            },
+          });
+        }),
+      ]);
+
+      const container = HttpLambda.getContainer();
+      const body: ParsingRequest = {
+        foo: 'bar',
+        bar: 'foo',
+      };
+
+      const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
+        configuredRoute: {
+          constructor: ParsingTestEndpoint,
+          method: 'POST',
+          route: '/triginta/middlware/json',
+        },
+        container,
+        path: '/triginta/middlware/json',
+        body,
+      })) as APIGatewayProxyStructuredResultV2;
+
+      expect(messages[0]).toEqual(body);
+
+      console.log(response);
+      expect(response.statusCode).toEqual(200);
+    });
   });
 });

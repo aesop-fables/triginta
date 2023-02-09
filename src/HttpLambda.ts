@@ -12,6 +12,7 @@ import {
   APIGatewayEventRequestContextV2,
   APIGatewayProxyEventV2,
   APIGatewayProxyEventV2WithRequestContext,
+  APIGatewayProxyStructuredResultV2,
   Handler,
 } from 'aws-lambda';
 import middy from '@middy/core';
@@ -24,20 +25,22 @@ export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext
 export interface BootstrappedHttpLambdaContext {
   createHttpLambda<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output>>,
-  ): Handler<APIGatewayProxyEventV2, Output>;
+  ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
 }
 
 export interface IHttpLambdaFactory {
   // When we create the child container, do we need to be able to inject stuff?
   // e.g., "inject the current event for nested dependencies to have context" <-- This might be a "do it if/when we need it" kind of thing.
-  createHandler<Input, Output>(newable: Newable<IHttpEndpoint<Input, Output>>): Handler<APIGatewayProxyEventV2, Output>;
+  createHandler<Input, Output>(
+    newable: Newable<IHttpEndpoint<Input, Output>>,
+  ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
 }
 
 export class HttpLambdaFactory implements IHttpLambdaFactory {
   constructor(private readonly container: IServiceContainer) {}
   createHandler<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output>>,
-  ): Handler<APIGatewayProxyEventV2, Output> {
+  ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
     const handler = async (event: NonNoisyEvent) => {
       const childContainer = this.container.createChildContainer('httpLambda');
       try {
@@ -49,7 +52,17 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
           event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
         )) as Output;
 
-        return response;
+        // TODO -- Break this out into a response writer
+        let proxyResponse = response as APIGatewayProxyStructuredResultV2;
+        if (typeof proxyResponse?.statusCode === 'undefined') {
+          // TODO -- Is 200 always correct here?
+          proxyResponse = {
+            statusCode: 200,
+            body: response ? JSON.stringify(response) : undefined,
+          };
+        }
+
+        return proxyResponse;
       } finally {
         if (childContainer) {
           try {
@@ -90,7 +103,7 @@ export class HttpLambda {
     return {
       createHttpLambda<Input, Output>(
         newable: Newable<IHttpEndpoint<Input, Output>>,
-      ): Handler<APIGatewayProxyEventV2, Output> {
+      ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
         const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
         return factory.createHandler(newable);
       },

@@ -4,6 +4,7 @@ import {
   APIGatewayProxyEventHeaders,
   APIGatewayProxyEventPathParameters,
   APIGatewayProxyEventV2,
+  APIGatewayProxyStructuredResultV2,
   Handler,
 } from 'aws-lambda';
 import { HttpLambda, IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
@@ -12,6 +13,7 @@ import { HttpLambdaServices } from './HttpLambdaServices';
 import { IServiceContainer, Newable } from '@aesop-fables/containr';
 import { IHttpEndpoint } from './IHttpEndpoint';
 import { IConfiguredRoute } from './IConfiguredRoute';
+import middy from '@middy/core';
 
 export interface InvocationContext {
   configuredRoute: IConfiguredRoute;
@@ -97,7 +99,7 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
       accept: '*/*',
       'accept-encoding': 'gzip, deflate, br',
       // 'content-length': '0',
-      // 'content-type': 'application/json',
+      'content-type': 'application/json',
       host: '',
       'user-agent': 'triginta/1.0',
       'x-amzn-trace-id': 'Root=1-63e26f79-577a8db87d3b31fa4da65566',
@@ -130,40 +132,39 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
 }
 
 // TODO -- We need to rename this to make it clear that it's for testing ONLY
-export async function invokeHttpHandler<Output>(context: InvocationContext): Promise<Output> {
+export async function invokeHttpHandler<Output>(
+  context: InvocationContext,
+): Promise<APIGatewayProxyStructuredResultV2> {
   const { container } = context;
   const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
   const configuredHandler = factory.createHandler(
     context.configuredRoute.constructor as Newable<IHttpEndpoint<any, any>>,
-  ) as Handler<NonNoisyEvent, Output>;
+  ) as middy.MiddyfiedHandler<NonNoisyEvent, APIGatewayProxyStructuredResultV2>;
 
-  return configuredHandler(
-    createApiGatewayEvent(context) as NonNoisyEvent,
-    {
-      callbackWaitsForEmptyEventLoop: false,
-      functionName: 'httpLambda',
-      functionVersion: '0.1',
-      invokedFunctionArn: 'arn::test',
-      memoryLimitInMB: '128',
-      awsRequestId: '1234',
-      logGroupName: 'test-group',
-      logStreamName: 'test-stream',
-      getRemainingTimeInMillis: function (): number {
-        throw new Error('Function not implemented.');
-      },
-      done: function (error?: Error | undefined, result?: any): void {
-        throw new Error('Function not implemented.');
-      },
-      fail: function (error: string | Error): void {
-        throw new Error('Function not implemented.');
-      },
-      succeed: function (messageOrObject: any): void {
-        throw new Error('Function not implemented.');
-      },
+  const event = createApiGatewayEvent(context) as NonNoisyEvent;
+  const handlerContext = {
+    callbackWaitsForEmptyEventLoop: false,
+    functionName: 'httpLambda',
+    functionVersion: '0.1',
+    invokedFunctionArn: 'arn::test',
+    memoryLimitInMB: '128',
+    awsRequestId: '1234',
+    logGroupName: 'test-group',
+    logStreamName: 'test-stream',
+    getRemainingTimeInMillis: function (): number {
+      return 1000;
     },
-    () => {
-      // no-op
-      throw new Error('Not supported');
+    done: function (error?: Error | undefined, result?: any): void {
+      throw new Error('Function not implemented.');
     },
-  ) as Promise<Output>;
+    fail: function (error: string | Error): void {
+      throw new Error('Function not implemented.');
+    },
+    succeed: function (messageOrObject: any): void {
+      throw new Error('Function not implemented.');
+    },
+  };
+
+  const response = await configuredHandler(event, handlerContext);
+  return response;
 }

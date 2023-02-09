@@ -1,6 +1,6 @@
 {
   "name": "@aesop-fables/triginta",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "A lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.).",
   "type": "commonjs",
   "exports": {
@@ -45,9 +45,9 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@middy/core": "^1.5.2",
-    "@middy/http-error-handler": "^1.5.2",
-    "@middy/http-json-body-parser": "^1.5.2",
+    "@middy/core": "^4.2.3",
+    "@middy/http-error-handler": "^4.2.3",
+    "@middy/http-json-body-parser": "^4.2.3",
     "reflect-metadata": "^0.1.13",
     "xss": "^1.0.9"
   },
