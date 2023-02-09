@@ -1,6 +1,11 @@
 import { IConfiguredRoute } from './IConfiguredRoute';
 
-class RouteRegistry {
+export interface IRouteRegistry {
+  allRoutes(): IConfiguredRoute[];
+  register(route: IConfiguredRoute): void;
+}
+
+class RouteRegistry implements IRouteRegistry {
   private readonly routes: IConfiguredRoute[] = [];
 
   allRoutes(): IConfiguredRoute[] {
