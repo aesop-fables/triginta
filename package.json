@@ -1,6 +1,6 @@
 {
   "name": "@aesop-fables/triginta",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.).",
   "type": "commonjs",
   "exports": {
