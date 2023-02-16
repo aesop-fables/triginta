@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aesop-fables/containr@^0.1.5":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.1.6.tgz#1ed5d7927e48a9935d68abb74f74c9ae30f8f059"
-  integrity sha512-zlFnRuV8ba8KbjjYfPqE+Gj2G8AkWJ91yTnrwIN4WnWsJSvxLwzMbksfzui2Ru/dfA/ySHW+bNsE+YCg9Iifyg==
+"@aesop-fables/containr@^0.2.3":
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.2.3.tgz#d495f39e38cc2b96a1e187fe34ae1e236b7a4d14"
+  integrity sha512-U4bpI9o8+OPC6lo0JcPCJa38IDCyRGD+M7K+n4Owt/uf/wdBJ8hHcR5LEq3TtNr6OjkeAy0+oPPedhgvNJTtow==
   dependencies:
     jest-mock-extended "^3.0.1"
     reflect-metadata "^0.1.13"
