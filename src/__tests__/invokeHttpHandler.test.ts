@@ -184,6 +184,7 @@ describe('invokeHttpHandler', () => {
   describe('middyified handlers', () => {
     it('test the json parsing middleware', async () => {
       const events: APIGatewayProxyEventV2[] = [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
 
       HttpLambda.initialize([
