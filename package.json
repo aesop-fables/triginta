@@ -24,7 +24,7 @@
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
-    "@aesop-fables/containr": "^0.1.5",
+    "@aesop-fables/containr": "^0.2.3",
     "@types/aws-lambda": "^8.10.109",
     "@types/jest": "^29.2.4",
     "@types/node": "^18.11.11",
