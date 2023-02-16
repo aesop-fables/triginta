@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { IHandler } from './IHandler';
 import { IHttpEndpoint } from './IHttpEndpoint';
 
