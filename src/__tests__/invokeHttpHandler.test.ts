@@ -213,14 +213,15 @@ describe('invokeHttpHandler', () => {
           route: '/triginta/middlware/json',
         },
         container,
-        path: '/triginta/middlware/json',
+        path: '/triginta/middlware/json?foo=bar',
         body,
       })) as APIGatewayProxyStructuredResultV2;
 
       expect(messages[0]).toEqual(body);
-
-      console.log(response);
       expect(response.statusCode).toEqual(200);
+
+      const [event] = events;
+      expect(event?.queryStringParameters?.foo).toEqual('bar');
     });
   });
 });

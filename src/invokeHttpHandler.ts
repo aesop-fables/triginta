@@ -126,6 +126,7 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
       timeEpoch: Date.now(),
     },
     body: body ? JSON.stringify(body) : undefined,
+    ...parsePathParameters(context),
   };
 
   return event;
