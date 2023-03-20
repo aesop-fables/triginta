@@ -29,7 +29,7 @@
     "@middy/http-error-handler": "^4.2.3",
     "@middy/http-json-body-parser": "^4.2.3",
     "@types/aws-lambda": "^8.10.109",
-    "@types/jest": "^29.2.4",
+    "@types/jest": "^29.5.0",
     "@types/node": "^18.11.11",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "5.55.0",
