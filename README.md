@@ -14,3 +14,11 @@ yarn add @aesop-fables/triginta
 
 Docs are coming. In the meantime, we recommend you checkout the docs from middyjs and our example repo: 
 https://github.com/aesop-fables/triginta-example
+
+
+## Breaking Changes
+
+### v0.4.0
+
+The `path` property of the `InvocationContext` (used in `invokeHttpHandler`) was renamed to `rawPath` to properly match the 
+expected API Gateway Event.
