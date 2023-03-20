@@ -1,4 +1,4 @@
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { IHandler } from './IHandler';
+import { IMessageHandler } from './IHandler';
 
-export interface IHttpEndpoint<Input, Output> extends IHandler<Input, APIGatewayProxyEventV2, Output> {}
+export interface IHttpEndpoint<Input, Output> extends IMessageHandler<Input, APIGatewayProxyEventV2, Output> {}
