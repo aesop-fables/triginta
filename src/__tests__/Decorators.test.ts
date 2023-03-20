@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import 'reflect-metadata';
 import {
   getRoute,
   endpointMetadataKey,
@@ -11,7 +12,6 @@ import {
   httpPut,
   httpDelete,
 } from '../Decorators';
-import 'reflect-metadata';
 import { IConfiguredRoute } from '../IConfiguredRoute';
 
 describe('Decorators', () => {
