@@ -15,14 +15,11 @@ import { IHttpEndpoint } from './IHttpEndpoint';
 import { IConfiguredRoute } from './IConfiguredRoute';
 import middy from '@middy/core';
 
-export interface InvocationContext {
+//Omit<APIGatewayProxyEventV2, 'container' | 'body'> & { body?: any }
+declare type InvocableEvent = Omit<APIGatewayProxyEventV2, 'body'> & { body: any };
+export interface InvocationContext extends Partial<InvocableEvent> {
   configuredRoute: IConfiguredRoute;
   container: IServiceContainer;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  body?: any;
-  path: string;
-
-  // Possibly smuggle any options that the consumer passed
 }
 
 function normalizeAndParse(input: string): string[] {
@@ -71,42 +68,56 @@ export function parseRouteParams(route: string, path: string): APIGatewayProxyEv
 }
 
 export function parsePathParameters(context: EventGenerationContext): Partial<APIGatewayProxyEventV2> {
-  const { path } = context;
+  const { rawPath } = context;
   let queryStringParameters = {};
-  if (path.indexOf('?') !== -1) {
-    const values = path.split('?');
+  if (rawPath?.indexOf('?') !== -1) {
+    const values = rawPath?.split('?') ?? [];
     if (values.length > 1) {
       queryStringParameters = queryString.parse(values[1]);
     }
   }
 
   return {
-    rawPath: path,
-    pathParameters: parseRouteParams(context.configuredRoute.route, context.path),
+    rawPath,
+    pathParameters: parseRouteParams(context.configuredRoute.route, context.rawPath as string),
     queryStringParameters,
   };
 }
 
 export declare type EventGenerationContext = Omit<InvocationContext, 'container'>;
 
+function stringOrJsonStringify(input?: any): string | undefined {
+  if (typeof input === 'undefined') {
+    return undefined;
+  }
+
+  if (typeof input === 'string') {
+    return input;
+  }
+
+  return JSON.stringify(input);
+}
+
+const DEFAULT_HEADERS = {
+  accept: '*/*',
+  'accept-encoding': 'gzip, deflate, br',
+  // 'content-length': '0',
+  'content-type': 'application/json',
+  host: '',
+  'user-agent': 'triginta/1.0',
+  'x-amzn-trace-id': 'Root=1-63e26f79-577a8db87d3b31fa4da65566',
+  'x-forwarded-for': '127.0.0.1',
+  'x-forwarded-port': '80',
+  'x-forwarded-proto': 'http',
+};
+
 export function createApiGatewayEvent(context: EventGenerationContext): Partial<APIGatewayProxyEventV2> {
-  const { configuredRoute, path, body } = context;
+  const { configuredRoute, rawPath, body, headers } = context;
   const routeKey = `${configuredRoute.method} ${configuredRoute.route}`;
   const event: Partial<APIGatewayProxyEventV2> = {
     version: '2.0',
     routeKey,
-    headers: {
-      accept: '*/*',
-      'accept-encoding': 'gzip, deflate, br',
-      // 'content-length': '0',
-      'content-type': 'application/json',
-      host: '',
-      'user-agent': 'triginta/1.0',
-      'x-amzn-trace-id': 'Root=1-63e26f79-577a8db87d3b31fa4da65566',
-      'x-forwarded-for': '127.0.0.1',
-      'x-forwarded-port': '80',
-      'x-forwarded-proto': 'http',
-    },
+    headers: { ...DEFAULT_HEADERS, ...headers },
     requestContext: {
       accountId: '888888888888',
       apiId: 'trigintaLocal',
@@ -114,7 +125,7 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
       domainPrefix: '',
       http: {
         method: configuredRoute.method,
-        path,
+        path: rawPath ?? '',
         protocol: 'HTTP/1.1',
         sourceIp: '127.0.0.1',
         userAgent: 'triginta/1.0',
@@ -125,7 +136,7 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
       time: '',
       timeEpoch: Date.now(),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: stringOrJsonStringify(body),
     ...parsePathParameters(context),
   };
 

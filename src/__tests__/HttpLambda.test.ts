@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { createServiceModule, Newable } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
-import { getRoute, httpGet, IHttpEndpoint } from '..';
+import { getRoute, httpGet, IHttpEndpoint, IHttpEventHandler } from '..';
 import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory } from '../HttpLambda';
 import { invokeHttpHandler } from '../invokeHttpHandler';
 import { HttpLambdaServices } from '../HttpLambdaServices';
@@ -17,6 +17,14 @@ class InitializeEndpoint implements IHttpEndpoint<InitializeRequest, string> {
   }
 }
 
+@httpGet('/http-lambda/initialize/without-input')
+class InitializeWithoutInputEndpoint implements IHttpEventHandler<string> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async handle(event: APIGatewayProxyEventV2): Promise<string> {
+    return `Hello, ${event.headers['x-message']}`;
+  }
+}
+
 describe('HttpLambda', () => {
   describe('initialize', () => {
     test('no service modules', async () => {
@@ -24,15 +32,32 @@ describe('HttpLambda', () => {
       const response = await invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
         container: HttpLambda.getContainer(),
-        path: '/http-lambda/initialize',
+        rawPath: '/http-lambda/initialize',
       });
 
       expect(response.body).toBe('"Hello!"');
     });
 
+    test('no input model', async () => {
+      HttpLambda.initialize();
+      const response = await invokeHttpHandler({
+        configuredRoute: getRoute(InitializeWithoutInputEndpoint) as IConfiguredRoute,
+        container: HttpLambda.getContainer(),
+        headers: { 'x-message': 'sans-input!' },
+        rawPath: '/http-lambda/initialize/without-input',
+      });
+
+      expect(response.body).toBe('"Hello, sans-input!"');
+    });
+
     test('override IHttpLambdaFactory', async () => {
       class CustomHttpLambdaFactory implements IHttpLambdaFactory {
         constructor(private readonly inner: IHttpLambdaFactory) {}
+        createEventHandler<Output>(
+          newable: Newable<IHttpEventHandler<Output>>,
+        ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+          return this.inner.createEventHandler(newable);
+        }
         createHandler<Input, Output>(
           newable: Newable<IHttpEndpoint<Input, Output>>,
         ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
@@ -58,7 +83,7 @@ describe('HttpLambda', () => {
       const response = await invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
         container: HttpLambda.getContainer(),
-        path: '/http-lambda/initialize',
+        rawPath: '/http-lambda/initialize',
       });
 
       expect(response.body).toBe('Hello, World!');

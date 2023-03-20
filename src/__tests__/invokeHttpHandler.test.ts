@@ -37,7 +37,7 @@ describe('createApiGatewayEvent', () => {
             method: 'GET',
             route: '/test/hello',
           },
-          path: '/test/hello',
+          rawPath: '/test/hello',
         });
 
         expect(event.rawPath).toBe('/test/hello');
@@ -51,7 +51,7 @@ describe('createApiGatewayEvent', () => {
             method: 'GET',
             route: '/test/hello',
           },
-          path: '/test/hello?foo=bar&bar=foo',
+          rawPath: '/test/hello?foo=bar&bar=foo',
         });
 
         expect(event.rawPath).toBe('/test/hello?foo=bar&bar=foo');
@@ -69,7 +69,7 @@ describe('createApiGatewayEvent', () => {
             method: 'GET',
             route: '/params/{param1}/blah/{param2}',
           },
-          path: '/params/hello/blah/world',
+          rawPath: '/params/hello/blah/world',
         });
 
         expect(event.rawPath).toBe('/params/hello/blah/world');
@@ -90,7 +90,7 @@ describe('createApiGatewayEvent', () => {
             method: 'GET',
             route: '/test',
           },
-          path: '/test',
+          rawPath: '/test',
         });
 
         expect(event.version).toBe('2.0');
@@ -106,7 +106,7 @@ describe('createApiGatewayEvent', () => {
             method: 'GET',
             route: '/test',
           },
-          path: '/test',
+          rawPath: '/test',
         });
 
         expect(event.requestContext?.accountId).toBe('888888888888');
@@ -127,7 +127,7 @@ describe('createApiGatewayEvent', () => {
               method: 'GET',
               route: '/test',
             },
-            path: '/test',
+            rawPath: '/test',
           });
 
           expect(event.requestContext?.http?.method).toBe('GET');
@@ -147,7 +147,7 @@ describe('createApiGatewayEvent', () => {
             method: 'GET',
             route: '/test',
           },
-          path: '/test',
+          rawPath: '/test',
         });
 
         const headers = event.headers ?? {};
@@ -172,7 +172,7 @@ describe('createApiGatewayEvent', () => {
         method: 'POST',
         route: '/test',
       },
-      path: '/test',
+      rawPath: '/test',
       body,
     });
 
@@ -213,7 +213,7 @@ describe('invokeHttpHandler', () => {
           route: '/triginta/middlware/json',
         },
         container,
-        path: '/triginta/middlware/json?foo=bar',
+        rawPath: '/triginta/middlware/json?foo=bar',
         body,
       })) as APIGatewayProxyStructuredResultV2;
 

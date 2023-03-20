@@ -80,7 +80,7 @@ describe('createHttpLambda', () => {
       configuredRoute: getRoute(CreateStatusAlertEndpoint) as IConfiguredRoute,
       container,
       body,
-      path: 'testpath',
+      rawPath: 'testpath',
     });
 
     const endpointMetadata = getRoute(CreateStatusAlertEndpoint) as IConfiguredRoute;

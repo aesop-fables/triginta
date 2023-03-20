@@ -16,13 +16,16 @@ import {
   Handler,
 } from 'aws-lambda';
 import middy from '@middy/core';
-import { IHttpEndpoint } from './IHttpEndpoint';
+import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware } from './Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
 export interface BootstrappedHttpLambdaContext {
+  createHttpEventLambda<Output>(
+    newable: Newable<IHttpEventHandler<Output>>,
+  ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
   createHttpLambda<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
@@ -32,25 +35,42 @@ export interface IHttpLambdaFactory {
   // When we create the child container, do we need to be able to inject stuff?
   // e.g., "inject the current event for nested dependencies to have context" <-- This might be a "do it if/when we need it" kind of thing.
   createHandler<Input, Output>(
-    newable: Newable<IHttpEndpoint<Input, Output>>,
+    newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
+  ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
+  createEventHandler<Output>(
+    newable: Newable<IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
 }
 
 export class HttpLambdaFactory implements IHttpLambdaFactory {
   constructor(private readonly container: IServiceContainer) {}
+  createEventHandler<Output>(
+    newable: Newable<IHttpEventHandler<Output>>,
+  ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+    return this.createHandler<any, Output>(newable);
+  }
   createHandler<Input, Output>(
-    newable: Newable<IHttpEndpoint<Input, Output>>,
+    newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
     const handler = async (event: NonNoisyEvent) => {
       const childContainer = this.container.createChildContainer('httpLambda');
       try {
-        const endpoint = this.container.resolve(newable);
+        const handler = this.container.resolve(newable);
         const { body: request } = event;
 
-        const response = (await endpoint.handle(
-          request as Input,
-          event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
-        )) as Output;
+        let response: Output;
+        if (request) {
+          const endpoint = handler as IHttpEndpoint<Input, Output>;
+          response = (await endpoint.handle(
+            request as Input,
+            event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+          )) as Output;
+        } else {
+          const eventHandler = handler as IHttpEventHandler<Output>;
+          response = (await eventHandler.handle(
+            event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+          )) as Output;
+        }
 
         // TODO -- Break this out into a response writer
         let proxyResponse = response as APIGatewayProxyStructuredResultV2;
@@ -101,8 +121,14 @@ export class HttpLambda {
     const container = createContainer([useTrigintaHttp, ...modules]);
     _currentContainer = container;
     return {
+      createHttpEventLambda<Output>(
+        newable: Newable<IHttpEventHandler<Output>>,
+      ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+        const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
+        return factory.createEventHandler(newable);
+      },
       createHttpLambda<Input, Output>(
-        newable: Newable<IHttpEndpoint<Input, Output>>,
+        newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
       ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
         const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
         return factory.createHandler(newable);
