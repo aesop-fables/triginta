@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { createServiceModule, Newable } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
 import { getRoute, httpGet, IHttpEndpoint, IHttpEventHandler } from '..';
-import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory } from '../HttpLambda';
+import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory, IHttpResponseGenerator } from '../HttpLambda';
 import { invokeHttpHandler } from '../invokeHttpHandler';
 import { HttpLambdaServices } from '../HttpLambdaServices';
 import { IConfiguredRoute } from '../IConfiguredRoute';
@@ -76,6 +76,41 @@ describe('HttpLambda', () => {
         services.register<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory, (container) => {
           const inner = new HttpLambdaFactory(container);
           return new CustomHttpLambdaFactory(inner);
+        });
+      });
+
+      HttpLambda.initialize([useCustomFactory]);
+      const response = await invokeHttpHandler({
+        configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
+        container: HttpLambda.getContainer(),
+        rawPath: '/http-lambda/initialize',
+      });
+
+      expect(response.body).toBe('Hello, World!');
+    });
+
+    test('override IHttpResponseGenerator', async () => {
+      class CustomHttpResponseGenerator implements IHttpResponseGenerator {
+        async generateResponse(response?: any): Promise<APIGatewayProxyStructuredResultV2> {
+          if (typeof response !== 'string') {
+            throw new Error('Sorry, we cannot handle anything other than strings');
+          }
+
+          let proxyResponse = response as APIGatewayProxyStructuredResultV2;
+          if (typeof proxyResponse?.statusCode === 'undefined') {
+            proxyResponse = {
+              statusCode: 200,
+              body: 'Hello, World!',
+            };
+          }
+
+          return proxyResponse;
+        }
+      }
+
+      const useCustomFactory = createServiceModule('customHttpReponseGenerator', (services) => {
+        services.register<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator, () => {
+          return new CustomHttpResponseGenerator();
         });
       });
 

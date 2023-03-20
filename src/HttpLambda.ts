@@ -42,6 +42,25 @@ export interface IHttpLambdaFactory {
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
 }
 
+export interface IHttpResponseGenerator {
+  generateResponse(response?: any): Promise<APIGatewayProxyStructuredResultV2>;
+}
+
+export class HttpResponseGenerator implements IHttpResponseGenerator {
+  async generateResponse(response?: any): Promise<APIGatewayProxyStructuredResultV2> {
+    let proxyResponse = response as APIGatewayProxyStructuredResultV2;
+    if (typeof proxyResponse?.statusCode === 'undefined') {
+      // TODO -- Is 200 always correct here?
+      proxyResponse = {
+        statusCode: 200,
+        body: response ? JSON.stringify(response) : undefined,
+      };
+    }
+
+    return proxyResponse;
+  }
+}
+
 export class HttpLambdaFactory implements IHttpLambdaFactory {
   constructor(private readonly container: IServiceContainer) {}
   createEventHandler<Output>(
@@ -54,6 +73,8 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
     const handler = async (event: NonNoisyEvent) => {
       const childContainer = this.container.createChildContainer('httpLambda');
+      // TODO -- Containr doens't have a way to inject itself YET so we'll just pull the dependency out of the container directly
+      const responseGenerator = childContainer.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
       try {
         const handler = this.container.resolve(newable);
         const { body: request } = event;
@@ -72,17 +93,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
           )) as Output;
         }
 
-        // TODO -- Break this out into a response writer
-        let proxyResponse = response as APIGatewayProxyStructuredResultV2;
-        if (typeof proxyResponse?.statusCode === 'undefined') {
-          // TODO -- Is 200 always correct here?
-          proxyResponse = {
-            statusCode: 200,
-            body: response ? JSON.stringify(response) : undefined,
-          };
-        }
-
-        return proxyResponse;
+        return responseGenerator.generateResponse(response);
       } finally {
         if (childContainer) {
           try {
@@ -108,6 +119,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
 }
 
 export const useTrigintaHttp = createServiceModule('triginta/http', (services) => {
+  services.use<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator, HttpResponseGenerator);
   services.register<IHttpLambdaFactory>(
     HttpLambdaServices.HttpLambdaFactory,
     (container) => new HttpLambdaFactory(container),
