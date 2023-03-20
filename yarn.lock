@@ -711,16 +711,11 @@
     "@middy/util" "4.2.7"
 
 "@middy/http-json-body-parser@^4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@middy/http-json-body-parser/-/http-json-body-parser-4.2.3.tgz#839f7c32d0d9d357e3676564d08c8ee8a7de2b6e"
-  integrity sha512-3Y1oqEKflOTm9wdOEEPv0PiQH2bH66Uoizkjp1wI2mqlGH55QujIe69+1x2+E+8SyDFzXd2HThahAnUbodYBag==
+  version "4.2.7"
+  resolved "https://registry.yarnpkg.com/@middy/http-json-body-parser/-/http-json-body-parser-4.2.7.tgz#b70b1024189d05227fe5b73ef3f486e890682726"
+  integrity sha512-p8LSL/giD9ZuRcpE4MKbvyzeA/UnZf0hFzk9aa5iMr3kaNYVxWeX9wCshfkoKhEew09qHmLVa/UJ6XPOQGqRTA==
   dependencies:
-    "@middy/util" "4.2.3"
-
-"@middy/util@4.2.3":
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.2.3.tgz#ca89bd918a692f619deb4706c06968e7b7392564"
-  integrity sha512-e8ohacFXjv2GeZCBpj8Iz6dl2VbJNsEHgA8GFNikse7KFJh4F8BiyLe72o56d4q3suVBRAKVBBQ65cY98gsaJA==
+    "@middy/util" "4.2.7"
 
 "@middy/util@4.2.7":
   version "4.2.7"
