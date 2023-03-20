@@ -1,5 +1,4 @@
-import 'reflect-metadata';
-import { IHandler } from './IHandler';
+import { IMessageHandler } from './IHandler';
 import { IHttpEndpoint } from './IHttpEndpoint';
 
 export * from './Decorators';
@@ -10,4 +9,4 @@ export * from './invokeHttpHandler';
 export * from './IConfiguredRoute';
 export * from './TrigintaConfig';
 
-export { IHandler, IHttpEndpoint };
+export { IMessageHandler, IHttpEndpoint };
