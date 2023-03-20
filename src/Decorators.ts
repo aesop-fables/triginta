@@ -8,6 +8,7 @@ export const endpointMetadataKey = Symbol('@endpointMetadataKey');
 function defineEndpointMetadata(method: string, route: string) {
   return (target: Object): void => {
     const params: IConfiguredRoute = { method, route, constructor: target as Function };
+    console.log('wtf', params);
     Reflect.defineMetadata(endpointMetadataKey, params, target);
     RouteRegistry.register(params);
   };
