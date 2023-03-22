@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
-import { HttpLambda, IHttpEndpoint, useMiddleware } from '..';
+import { HttpLambda, httpPost, IHttpEndpoint, useMiddleware } from '..';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { parsePathParameters, createApiGatewayEvent, invokeHttpHandler } from '../invokeHttpHandler';
 import jsonBodyParser from '@middy/http-json-body-parser';
@@ -18,6 +18,7 @@ interface ParsingRequest {
   bar: string;
 }
 
+@httpPost('/triginta/middlware/json')
 @useMiddleware(jsonBodyParser)
 class ParsingTestEndpoint implements IHttpEndpoint<ParsingRequest, void> {
   constructor(@inject(RECORDER_KEY) private readonly events: IEndpointRecorder) {}
