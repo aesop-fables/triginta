@@ -80,7 +80,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
         const { body: request } = event;
 
         let response: Output;
-        if (request) {
+        if (request || request !== '{}') {
           const endpoint = handler as IHttpEndpoint<Input, Output>;
           response = (await endpoint.handle(
             request as Input,
