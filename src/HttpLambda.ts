@@ -81,7 +81,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
 
         let response: Output;
         const route = getRoute(newable);
-        if(!route){
+        if (!route) {
           throw new Error('No route found for the specified endpoint');
         }
         if (route.method !== 'get') {
