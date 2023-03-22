@@ -17,7 +17,7 @@ import {
 } from 'aws-lambda';
 import middy from '@middy/core';
 import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
-import { getMiddleware } from './Decorators';
+import { getMiddleware, getRoute } from './Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
@@ -80,7 +80,11 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
         const { body: request } = event;
 
         let response: Output;
-        if (request) {
+        const route = getRoute(newable);
+        if(!route){
+          throw new Error('No route found for the specified endpoint');
+        }
+        if (route.method !== 'route') {
           const endpoint = handler as IHttpEndpoint<Input, Output>;
           response = (await endpoint.handle(
             request as Input,
