@@ -30,12 +30,12 @@ class ParsingTestEndpoint implements IHttpEndpoint<ParsingRequest, void> {
 
 describe('createApiGatewayEvent', () => {
   describe('parsePathParameters', () => {
-    describe('GET', () => {
+    describe('get', () => {
       test('path with no params', async () => {
         const event = parsePathParameters({
           configuredRoute: {
             constructor: ParsingTestEndpoint,
-            method: 'GET',
+            method: 'get',
             route: '/test/hello',
           },
           rawPath: '/test/hello',
@@ -49,7 +49,7 @@ describe('createApiGatewayEvent', () => {
         const event = parsePathParameters({
           configuredRoute: {
             constructor: ParsingTestEndpoint,
-            method: 'GET',
+            method: 'get',
             route: '/test/hello',
           },
           rawPath: '/test/hello?foo=bar&bar=foo',
@@ -67,7 +67,7 @@ describe('createApiGatewayEvent', () => {
         const event = parsePathParameters({
           configuredRoute: {
             constructor: ParsingTestEndpoint,
-            method: 'GET',
+            method: 'get',
             route: '/params/{param1}/blah/{param2}',
           },
           rawPath: '/params/hello/blah/world',
@@ -88,14 +88,14 @@ describe('createApiGatewayEvent', () => {
         const event = createApiGatewayEvent({
           configuredRoute: {
             constructor: ParsingTestEndpoint,
-            method: 'GET',
+            method: 'get',
             route: '/test',
           },
           rawPath: '/test',
         });
 
         expect(event.version).toBe('2.0');
-        expect(event.routeKey).toBe('GET /test');
+        expect(event.routeKey).toBe('get /test');
       });
     });
 
@@ -104,7 +104,7 @@ describe('createApiGatewayEvent', () => {
         const event = createApiGatewayEvent({
           configuredRoute: {
             constructor: ParsingTestEndpoint,
-            method: 'GET',
+            method: 'get',
             route: '/test',
           },
           rawPath: '/test',
@@ -117,7 +117,7 @@ describe('createApiGatewayEvent', () => {
         expect(event.requestContext?.time).toBeDefined();
         expect(event.requestContext?.requestId).toBeDefined();
 
-        expect(event.requestContext?.routeKey).toBe('GET /test');
+        expect(event.requestContext?.routeKey).toBe('get /test');
       });
 
       describe('http', () => {
@@ -125,13 +125,13 @@ describe('createApiGatewayEvent', () => {
           const event = createApiGatewayEvent({
             configuredRoute: {
               constructor: ParsingTestEndpoint,
-              method: 'GET',
+              method: 'get',
               route: '/test',
             },
             rawPath: '/test',
           });
 
-          expect(event.requestContext?.http?.method).toBe('GET');
+          expect(event.requestContext?.http?.method).toBe('get');
           expect(event.requestContext?.http?.path).toBe('/test');
           expect(event.requestContext?.http?.protocol).toBe('HTTP/1.1');
           expect(event.requestContext?.http?.sourceIp).toBe('127.0.0.1');
@@ -145,7 +145,7 @@ describe('createApiGatewayEvent', () => {
         const event = createApiGatewayEvent({
           configuredRoute: {
             constructor: ParsingTestEndpoint,
-            method: 'GET',
+            method: 'get',
             route: '/test',
           },
           rawPath: '/test',
@@ -170,7 +170,7 @@ describe('createApiGatewayEvent', () => {
     const event = createApiGatewayEvent({
       configuredRoute: {
         constructor: ParsingTestEndpoint,
-        method: 'POST',
+        method: 'post',
         route: '/test',
       },
       rawPath: '/test',
@@ -210,7 +210,7 @@ describe('invokeHttpHandler', () => {
       const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
         configuredRoute: {
           constructor: ParsingTestEndpoint,
-          method: 'POST',
+          method: 'post',
           route: '/triginta/middlware/json',
         },
         container,

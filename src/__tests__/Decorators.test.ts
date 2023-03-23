@@ -21,7 +21,7 @@ describe('Decorators', () => {
         return null;
       };
       const route = 'testRoute';
-      const method = 'testMethod';
+      const method = 'get';
       const params: IConfiguredRoute = { method, route, constructor: target as Function };
       Reflect.defineMetadata(endpointMetadataKey, params, target);
       expect(getRoute(target as Function)).toBe(Reflect.getMetadata(endpointMetadataKey, target));
