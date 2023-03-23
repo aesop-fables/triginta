@@ -1,6 +1,6 @@
 {
   "name": "@aesop-fables/triginta",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.).",
   "type": "commonjs",
   "exports": {
@@ -16,7 +16,7 @@
     "format": "prettier --write \"src/**/*.(js|ts)\"",
     "lint": "eslint src --ext .js,.ts",
     "lint:fix": "eslint src --fix --ext .js,.ts",
-    "test": "jest --config jest.config.js",
+    "test": "jest --config jest.config.js --runInBand",
     "test:watch": "jest --config jest.config.js --watch",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
@@ -24,7 +24,7 @@
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
-    "@aesop-fables/containr": "^0.2.3",
+    "@aesop-fables/containr": "^0.2.4",
     "@middy/core": "^4.2.7",
     "@middy/http-error-handler": "^4.2.3",
     "@middy/http-json-body-parser": "^4.2.3",

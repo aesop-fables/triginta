@@ -219,7 +219,7 @@ describe('invokeHttpHandler', () => {
       })) as APIGatewayProxyStructuredResultV2;
 
       expect(messages[0]).toEqual(body);
-      expect(response.statusCode).toEqual(200);
+      expect(response.statusCode).toEqual(204);
 
       const [event] = events;
       expect(event?.queryStringParameters?.foo).toEqual('bar');
