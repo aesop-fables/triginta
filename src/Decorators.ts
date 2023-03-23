@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IConfiguredRoute } from './IConfiguredRoute';
+import { HttpMethod, IConfiguredRoute } from './IConfiguredRoute';
 import RouteRegistry from './RouteRegistry';
 
 /* eslint-disable @typescript-eslint/ban-types */
 export const endpointMetadataKey = Symbol('@endpointMetadataKey');
 
-function defineEndpointMetadata(method: string, route: string) {
+function defineEndpointMetadata(method: HttpMethod, route: string) {
   return (target: Object): void => {
     const params: IConfiguredRoute = { method, route, constructor: target as Function };
-    console.log('wtf', params);
     Reflect.defineMetadata(endpointMetadataKey, params, target);
     RouteRegistry.register(params);
   };
