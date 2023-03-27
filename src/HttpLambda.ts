@@ -4,6 +4,7 @@
 import {
   createContainer,
   createServiceModule,
+  inject,
   IServiceContainer,
   IServiceModule,
   Newable,
@@ -17,8 +18,9 @@ import {
 } from 'aws-lambda';
 import middy from '@middy/core';
 import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
-import { getMiddleware } from './Decorators';
+import { getMiddleware, getRoute } from './Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
+import { IConfiguredRoute } from './IConfiguredRoute';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -47,17 +49,33 @@ export interface IHttpResponseGenerator {
 }
 
 export class HttpResponseGenerator implements IHttpResponseGenerator {
+  constructor(@inject(HttpLambdaServices.CurrentRoute) private readonly configuredRoute: IConfiguredRoute) {}
   async generateResponse(response?: any): Promise<APIGatewayProxyStructuredResultV2> {
-    let proxyResponse = response as APIGatewayProxyStructuredResultV2;
-    if (typeof proxyResponse?.statusCode === 'undefined') {
-      // TODO -- Is 200 always correct here?
-      proxyResponse = {
+    const proxyResponse = response as APIGatewayProxyStructuredResultV2;
+    if (typeof proxyResponse?.statusCode !== 'undefined') {
+      return proxyResponse;
+    }
+
+    // TODO -- We should use the event to make this a little smarter
+    const body = response ? JSON.stringify(response) : undefined;
+    if (this.configuredRoute.method === 'get') {
+      return {
         statusCode: 200,
-        body: response ? JSON.stringify(response) : undefined,
+        body,
       };
     }
 
-    return proxyResponse;
+    if (typeof response === 'undefined') {
+      return {
+        statusCode: 204,
+        body: undefined,
+      };
+    }
+
+    return {
+      statusCode: 200,
+      body,
+    };
   }
 }
 
@@ -72,15 +90,26 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
     newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
     const handler = async (event: NonNoisyEvent) => {
-      const childContainer = this.container.createChildContainer('httpLambda');
-      // TODO -- Containr doens't have a way to inject itself YET so we'll just pull the dependency out of the container directly
+      const route = getRoute(newable);
+      if (!route) {
+        throw new Error('No route found for the specified endpoint');
+      }
+
+      const injectConfiguredRoute: IServiceModule = {
+        name: 'injectConfiguredRoute',
+        configureServices(services) {
+          services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
+        },
+      };
+
+      const childContainer = this.container.createChildContainer('httpLambda', [injectConfiguredRoute]);
       const responseGenerator = childContainer.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
       try {
         const handler = this.container.resolve(newable);
         const { body: request } = event;
 
         let response: Output;
-        if (request) {
+        if (route.method !== 'get') {
           const endpoint = handler as IHttpEndpoint<Input, Output>;
           response = (await endpoint.handle(
             request as Input,

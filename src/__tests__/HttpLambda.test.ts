@@ -91,6 +91,7 @@ describe('HttpLambda', () => {
 
     test('override IHttpResponseGenerator', async () => {
       class CustomHttpResponseGenerator implements IHttpResponseGenerator {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async generateResponse(response?: any): Promise<APIGatewayProxyStructuredResultV2> {
           if (typeof response !== 'string') {
             throw new Error('Sorry, we cannot handle anything other than strings');
