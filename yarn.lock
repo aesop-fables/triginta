@@ -721,6 +721,13 @@
   resolved "https://registry.yarnpkg.com/@middy/core/-/core-4.2.8.tgz#869668c894b94688133d9b147c7e622263bf40d5"
   integrity sha512-cz3nec4THgolPk3iK4JCxzXSJXudm0QlUFNRYl8JpcdY1vYSnlPuDZo6aKEFbh8+A5gBs04cGwMcnH/GTtNX6w==
 
+"@middy/event-normalizer@^4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@middy/event-normalizer/-/event-normalizer-4.3.0.tgz#62d1fa337fa0630c3c8712afe3c8b747e28208c7"
+  integrity sha512-DEVCmKlLerkvMGiVnqfMmt0nphfbNK7vYM69xqM83avY6ifUdTBNl+dF+RfVgc/KeYpvTed6sZF+h2VfnuPYLQ==
+  dependencies:
+    "@middy/util" "4.3.0"
+
 "@middy/http-error-handler@^4.2.3":
   version "4.2.7"
   resolved "https://registry.yarnpkg.com/@middy/http-error-handler/-/http-error-handler-4.2.7.tgz#deaf6b5e77dcb708f94f8934153224f2023e4e8d"
@@ -739,6 +746,11 @@
   version "4.2.7"
   resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.2.7.tgz#20ca6939ff773248927ad14e4ec6f3adb8a486b9"
   integrity sha512-4E+nLvR3YwGPBP1P656vhKuGLjoJByHcXJRW2JKbyeOlfqu4wPBB4HlYKRnNUK1vfQXaysbkzoieTfOsDRk5Lw==
+
+"@middy/util@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.3.0.tgz#87488825650d40c23f2f3b448aab0a26a0fd9c28"
+  integrity sha512-EAVkFH7L8FpSdmi/nbdz7dEXdU0GQ0BWDz+HcSaTmVddykpn2x70HLsxw34ggbBqF3Zb2awDuSOuLWX7ljXJnA==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

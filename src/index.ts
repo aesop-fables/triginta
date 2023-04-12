@@ -5,5 +5,8 @@ export * from './HttpLambda';
 export * from './HttpLambdaServices';
 export { default as RouteRegistry, IRouteRegistry } from './RouteRegistry';
 export * from './invokeHttpHandler';
+export * from './invokeSqsHandler';
+export * from './SqsLambda';
+export * from './SqsLambdaServices';
 export * from './IConfiguredRoute';
 export * from './TrigintaConfig';
