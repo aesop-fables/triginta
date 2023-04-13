@@ -34,8 +34,6 @@ export interface BootstrappedHttpLambdaContext {
 }
 
 export interface IHttpLambdaFactory {
-  // When we create the child container, do we need to be able to inject stuff?
-  // e.g., "inject the current event for nested dependencies to have context" <-- This might be a "do it if/when we need it" kind of thing.
   createHandler<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
