@@ -31,7 +31,7 @@ const jsonSafeParse = (text: any) => {
   const firstChar = text[0];
   if (firstChar !== '{' && firstChar !== '[' && firstChar !== '"') return text;
   try {
-      return JSON.parse(text);
+    return JSON.parse(text);
   } catch (e) {}
   return text;
 };
