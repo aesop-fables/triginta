@@ -15,7 +15,6 @@ async function verifyDefaultResponse(route: IConfiguredRoute, expected: number) 
   const generator = container.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
 
   const generatorResponse = await generator.generateResponse(route.constructor());
-  console.log(route);
   expect(generatorResponse.statusCode).toEqual(expected);
 }
 

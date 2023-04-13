@@ -1,11 +1,9 @@
 import 'reflect-metadata';
-import { APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2, SQSEvent, SQSRecord } from 'aws-lambda';
-import { SqsLambda, invokeSqsHandler, useMiddleware } from '..';
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { parsePathParameters, createApiGatewayEvent, invokeHttpHandler } from '../invokeHttpHandler';
-import jsonBodyParser from '@middy/http-json-body-parser';
-import { ISqsMessageHandler } from '../ISqsMessageHandler';
+import { ISqsMessageHandler, SqsLambda, TestUtils } from '..';
+import { SQSEvent, SQSRecord } from 'aws-lambda';
 
+const { invokeSqsHandler } = TestUtils;
 const RECORDER_KEY = 'eventRecorder';
 
 interface IEndpointRecorder {

@@ -1,19 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  APIGatewayProxyEventHeaders,
-  APIGatewayProxyEventPathParameters,
-  APIGatewayProxyEventV2,
-  APIGatewayProxyStructuredResultV2,
-  Handler,
-  SQSEvent,
-} from 'aws-lambda';
-import { HttpLambda, IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
-import queryString from 'node:querystring';
-import { HttpLambdaServices } from './HttpLambdaServices';
+import { SQSEvent } from 'aws-lambda';
 import { IServiceContainer, Newable } from '@aesop-fables/containr';
-import { IHttpEndpoint } from './IHttpEndpoint';
-import { IConfiguredRoute } from './IConfiguredRoute';
 import middy from '@middy/core';
 import { ISqsLambdaFactory } from './SqsLambda';
 import { SqsLambdaServices } from './SqsLambdaServices';
@@ -24,7 +12,12 @@ export interface SqsInvocationContext extends Partial<SQSEvent> {
   handler: Function;
   container: IServiceContainer;
 }
-// TODO -- We need to rename this to make it clear that it's for testing ONLY
+
+/**
+ * Invokes a lambda by constructing it from the specified container
+ * @param context
+ * @returns
+ */
 export async function invokeSqsHandler(context: SqsInvocationContext): Promise<void> {
   const { container } = context;
   const factory = container.get<ISqsLambdaFactory>(SqsLambdaServices.SqsLambdaFactory);

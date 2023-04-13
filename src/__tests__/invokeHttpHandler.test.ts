@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
-import { HttpLambda, httpPost, IHttpEndpoint, useMiddleware } from '..';
+import { HttpLambda, httpPost, IHttpEndpoint, TestUtils, useMiddleware } from '..';
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { parsePathParameters, createApiGatewayEvent, invokeHttpHandler } from '../invokeHttpHandler';
 import jsonBodyParser from '@middy/http-json-body-parser';
+
+const { parsePathParameters, createApiGatewayEvent, invokeHttpHandler } = TestUtils;
 
 const RECORDER_KEY = 'eventRecorder';
 

@@ -13,7 +13,6 @@ import middy from '@middy/core';
 import { ISqsMessageHandler, SqsOutput } from './ISqsMessageHandler';
 import { getMiddleware } from './Decorators';
 import { SqsLambdaServices } from './SqsLambdaServices';
-import eventNormalizer from '@middy/event-normalizer';
 
 export interface BootstrappedSqsLambdaContext {
   createHandler<Message, Output extends SqsOutput = void>(
