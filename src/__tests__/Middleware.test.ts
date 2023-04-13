@@ -1,12 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { IHttpEndpoint, httpPut, getRoute, invokeHttpHandler } from '..';
-import { HttpLambda } from '../HttpLambda';
-import { getMiddleware, useMiddleware } from '../Decorators';
+import {
+  getMiddleware,
+  IConfiguredRoute,
+  IHttpEndpoint,
+  HttpLambda,
+  httpPut,
+  getRoute,
+  TestUtils,
+  useMiddleware,
+} from '..';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHanlder from '@middy/http-error-handler';
-import { IConfiguredRoute } from '../IConfiguredRoute';
+
+const { invokeHttpHandler } = TestUtils;
 
 interface CreateStatusAlertRequest {
   app: string;

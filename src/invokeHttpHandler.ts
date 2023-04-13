@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
-  APIGatewayProxyEventHeaders,
   APIGatewayProxyEventPathParameters,
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
-  Handler,
 } from 'aws-lambda';
-import { HttpLambda, IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
+import { IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
 import queryString from 'node:querystring';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IServiceContainer, Newable } from '@aesop-fables/containr';
@@ -143,7 +141,11 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
   return event;
 }
 
-// TODO -- We need to rename this to make it clear that it's for testing ONLY
+/**
+ * Invokes a lambda by constructing it from the specified container
+ * @param context
+ * @returns
+ */
 export async function invokeHttpHandler<Output>(
   context: InvocationContext,
 ): Promise<APIGatewayProxyStructuredResultV2> {
