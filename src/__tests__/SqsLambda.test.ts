@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { SQSEvent, SQSRecord } from 'aws-lambda';
+import { SQSRecord } from 'aws-lambda';
 import { ISqsMessageHandler } from '../ISqsMessageHandler';
 import { SqsLambda } from '../SqsLambda';
 import { invokeSqsHandler } from '../invokeSqsHandler';
@@ -23,7 +23,7 @@ class MessageRecorder {
 // @httpGet('/http-lambda/initialize')
 class TestHandler implements ISqsMessageHandler<TestMessage> {
   constructor(@inject(recorderKey) private readonly recorder: MessageRecorder) {}
-  async handle(message: TestMessage, record: SQSRecord, event: SQSEvent): Promise<void> {
+  async handle(message: TestMessage): Promise<void> {
     this.recorder.record(message);
   }
 }
