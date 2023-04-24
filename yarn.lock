@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aesop-fables/containr@^0.2.4":
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.2.4.tgz#969358c89e0aa79a895a7d9639922a42d9ac53a4"
-  integrity sha512-slXDO+Y6CiJjyfek6ypyPXMkIekgV4noWEOkeEyydOaliLRpisLoIGm3vR2bzpEp9reDJiuZE4vNnmiIA9wRgg==
+"@aesop-fables/containr@^0.2.5":
+  version "0.2.5"
+  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.2.5.tgz#db2dd38194041adfece9e7dfd9537eb914004529"
+  integrity sha512-GrIHpMnHo55yy1rZCviNdLzllqywohxXOoCFEMQcKLRMgE5d2ND8Sod337YEULJDQf210qzaLlKeY9ba621phg==
   dependencies:
     jest-mock-extended "^3.0.1"
     reflect-metadata "^0.1.13"
@@ -739,6 +739,16 @@
   version "4.2.7"
   resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.2.7.tgz#20ca6939ff773248927ad14e4ec6f3adb8a486b9"
   integrity sha512-4E+nLvR3YwGPBP1P656vhKuGLjoJByHcXJRW2JKbyeOlfqu4wPBB4HlYKRnNUK1vfQXaysbkzoieTfOsDRk5Lw==
+
+"@middy/util@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.3.0.tgz#87488825650d40c23f2f3b448aab0a26a0fd9c28"
+  integrity sha512-EAVkFH7L8FpSdmi/nbdz7dEXdU0GQ0BWDz+HcSaTmVddykpn2x70HLsxw34ggbBqF3Zb2awDuSOuLWX7ljXJnA==
+
+"@middy/util@^4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.3.1.tgz#1ab6a796f8198286f9cd6ce3d52880fdc996c172"
+  integrity sha512-Ekv841eJL4z42UU1Ci1P4VcjByB4P/M+i3PccbGbX0niTOg0zautSIDf9Im5ISawKZYljiS+3bAgHbUwM2nUeA==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

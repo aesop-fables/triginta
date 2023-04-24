@@ -87,12 +87,12 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
   createHandler<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
-    const handler = async (event: NonNoisyEvent) => {
-      const route = getRoute(newable);
-      if (!route) {
-        throw new Error('No route found for the specified endpoint');
-      }
+    const route = getRoute(newable);
+    if (!route) {
+      throw new Error('No route found for the specified endpoint');
+    }
 
+    const handler = async (event: NonNoisyEvent, context: any) => {
       const injectConfiguredRoute: IServiceModule = {
         name: 'injectConfiguredRoute',
         configureServices(services) {
@@ -100,48 +100,52 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
         },
       };
 
-      const childContainer = this.container.createChildContainer('httpLambda', [injectConfiguredRoute]);
-      const responseGenerator = childContainer.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
-      try {
-        const handler = this.container.resolve(newable);
-        const { body: request } = event;
-
-        let response: Output;
-        if (route.method !== 'get') {
-          const endpoint = handler as IHttpEndpoint<Input, Output>;
-          response = (await endpoint.handle(
-            request as Input,
-            event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
-          )) as Output;
-        } else {
-          const eventHandler = handler as IHttpEventHandler<Output>;
-          response = (await eventHandler.handle(
-            event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
-          )) as Output;
-        }
-
-        return responseGenerator.generateResponse(response);
-      } finally {
-        if (childContainer) {
-          try {
-            childContainer.dispose();
-          } catch {
-            // no-op
-          }
-        }
+      const childContainer = context['container'] as IServiceContainer | undefined;
+      if (!childContainer) {
+        throw new Error('No container found in the context');
       }
+
+      const responseGenerator = childContainer.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
+      const handler = childContainer.resolve(newable);
+      const { body: request } = event;
+
+      let response: Output;
+      if (route.method !== 'get') {
+        const endpoint = handler as IHttpEndpoint<Input, Output>;
+        response = (await endpoint.handle(
+          request as Input,
+          event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+        )) as Output;
+      } else {
+        const eventHandler = handler as IHttpEventHandler<Output>;
+        response = (await eventHandler.handle(
+          event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+        )) as Output;
+      }
+
+      return responseGenerator.generateResponse(response);
     };
 
-    const middlewareMetadata = getMiddleware(newable);
-    if (middlewareMetadata) {
-      let midHandler = middy(handler);
-      middlewareMetadata.forEach((midFunc: Function) => {
-        midHandler = midHandler.use(midFunc());
-      });
-      return midHandler;
-    }
+    const { container } = this;
+    const middlewareMetadata = getMiddleware(newable) ?? [];
+    let midHandler = middy(handler).use({
+      async before(request) {
+        const injectConfiguredRoute = createServiceModule('injectConfiguredRoute', (services) => {
+          services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
+        });
 
-    return handler;
+        const childContainer = container.createChildContainer('httpLambda', [injectConfiguredRoute]);
+        request.context['container'] = childContainer;
+      },
+      after(request) {
+        request.context['container']?.dispose();
+      },
+    });
+    middlewareMetadata.forEach((midFunc: Function) => {
+      midHandler = midHandler.use(midFunc());
+    });
+
+    return midHandler;
   }
 }
 

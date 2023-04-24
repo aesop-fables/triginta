@@ -80,6 +80,8 @@ describe('createHttpLambda', () => {
 
     HttpLambda.initialize([setupCreateHttpLambdaTest]);
     const container = HttpLambda.getContainer();
+    // Force the recorder to resolve right away - otherwise, it'll get lost in the child container
+    const recorder = container.get<Recorder>(TestServices.Recorder);
 
     const middlewareMetadata = getMiddleware(CreateStatusAlertEndpoint) as any[];
     expect(middlewareMetadata[0]).toEqual(httpJsonBodyParser);
@@ -94,12 +96,12 @@ describe('createHttpLambda', () => {
     const endpointMetadata = getRoute(CreateStatusAlertEndpoint) as IConfiguredRoute;
     expect(endpointMetadata?.route).toEqual('testpath');
 
-    const recordedRequest = container.get<Recorder>(TestServices.Recorder).request;
-    expect(response.body).toEqual(
+    const recordedRequest = recorder.request;
+    expect(
       JSON.stringify({
         id: '123',
         ...recordedRequest,
       }),
-    );
+    ).toEqual(response.body);
   });
 });
