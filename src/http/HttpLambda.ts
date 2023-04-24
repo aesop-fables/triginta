@@ -18,9 +18,11 @@ import {
 } from 'aws-lambda';
 import middy from '@middy/core';
 import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
-import { getMiddleware, getRoute } from './Decorators';
+import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
+import { useHttpServices } from '.';
+import { useLocalization } from '../localization';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -132,6 +134,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
       async before(request) {
         const injectConfiguredRoute = createServiceModule('injectConfiguredRoute', (services) => {
           services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
+          services.register<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
         });
 
         const childContainer = container.createChildContainer('httpLambda', [injectConfiguredRoute]);
@@ -161,7 +164,7 @@ let _currentContainer: IServiceContainer | undefined;
 
 export class HttpLambda {
   static initialize(modules: IServiceModule[] = []): BootstrappedHttpLambdaContext {
-    const container = createContainer([useTrigintaHttp, ...modules]);
+    const container = createContainer([useTrigintaHttp, useHttpServices, useLocalization, ...modules]);
     _currentContainer = container;
     return {
       createHttpEventLambda<Output>(

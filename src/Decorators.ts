@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HttpMethod, IConfiguredRoute } from './IConfiguredRoute';
+import { HttpMethod, IConfiguredRoute } from './http/IConfiguredRoute';
 import RouteRegistry from './RouteRegistry';
 
 /* eslint-disable @typescript-eslint/ban-types */
