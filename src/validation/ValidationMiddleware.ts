@@ -6,6 +6,15 @@ import { IValidatorFactory } from './IValidatorFactory';
 import { IConfiguredValidationRule } from './IConfiguredValidationRule';
 import { ValidationServices } from './ValidationServices';
 
+export interface IValidationError {
+  field: string;
+  message: string;
+}
+
+export interface IValidationResponse {
+  errors: IValidationError[];
+}
+
 export function validate(
   rules: IConfiguredValidationRule[],
 ): () => middy.MiddlewareObj<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
@@ -29,9 +38,9 @@ export function validate(
               return {
                 field: msg.field,
                 message: msg.localizedString.defaultValue,
-              };
+              } as IValidationError;
             }),
-          }),
+          } as IValidationResponse),
         };
       },
     };

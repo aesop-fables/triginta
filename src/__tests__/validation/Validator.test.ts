@@ -7,6 +7,8 @@ import { HttpLambda } from '../../http/HttpLambda';
 import { invokeHttpHandler } from '../../http/invokeHttpHandler';
 import { APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { Validation } from '../..';
+import { IValidationRule } from '../../validation';
+import { LocalizedString } from '../../localization';
 
 const { validate } = Validation;
 
@@ -21,9 +23,20 @@ interface TestModel {
   firstName: string;
 }
 
+const Fugitive: LocalizedString = { key: 'Fugitive', defaultValue: 'Sounds too much like a fugitive, to me'};
+
+class TestRule implements IValidationRule {
+  async validate(context: Validation.ValidationContext): Promise<void> {
+    if (context.value() === 'Fugi') {
+      context.registerMessage(Fugitive);
+    }
+  }
+}
+
 const rules = Validation.parseRules<TestModel>({
   firstName: {
     required: true,
+    custom: [new TestRule()],
   },
 });
 
@@ -84,6 +97,50 @@ describe('Validator', () => {
 
       expect(messages.length).toBe(0);
       expect(response.statusCode).toEqual(400);
+
+      const responseBody = JSON.parse(response.body ?? '') as Validation.IValidationResponse;
+      expect(responseBody.errors.length).toBe(1);
+      expect(responseBody.errors[0].field).toBe('firstName');
+      expect(responseBody.errors[0].message).toBe(Validation.ValidationKeys.Required.defaultValue);
+    });
+
+    test('registers message for custom rule', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const messages: any[] = [];
+
+      HttpLambda.initialize([
+        createServiceModule('test', (services) => {
+          services.register<IEndpointRecorder>(RECORDER_KEY, {
+            recordRequest(request) {
+              messages.push(request);
+            },
+          });
+        }),
+      ]);
+
+      const container = HttpLambda.getContainer();
+      const body: TestModel = {
+        firstName: 'Fugi',
+      };
+
+      const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
+        configuredRoute: {
+          constructor: ValidationTestEndpoint,
+          method: 'post',
+          route: '/triginta/middlware/validation',
+        },
+        container,
+        rawPath: '/triginta/middlware/validation',
+        body,
+      })) as APIGatewayProxyStructuredResultV2;
+
+      expect(messages.length).toBe(0);
+      expect(response.statusCode).toEqual(400);
+
+      const responseBody = JSON.parse(response.body ?? '') as Validation.IValidationResponse;
+      expect(responseBody.errors.length).toBe(1);
+      expect(responseBody.errors[0].field).toBe('firstName');
+      expect(responseBody.errors[0].message).toBe(Fugitive.defaultValue);
     });
   });
 });
