@@ -23,6 +23,8 @@ import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
 import { useHttpServices } from '.';
 import { useLocalization } from '../localization';
+import { IRequestContext } from './IRequestContext';
+import { useHttpValidation } from '../validation';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -95,13 +97,6 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
     }
 
     const handler = async (event: NonNoisyEvent, context: any) => {
-      const injectConfiguredRoute: IServiceModule = {
-        name: 'injectConfiguredRoute',
-        configureServices(services) {
-          services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
-        },
-      };
-
       const childContainer = context['container'] as IServiceContainer | undefined;
       if (!childContainer) {
         throw new Error('No container found in the context');
@@ -132,12 +127,17 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
     const middlewareMetadata = getMiddleware(newable) ?? [];
     let midHandler = middy(handler).use({
       async before(request) {
-        const injectConfiguredRoute = createServiceModule('injectConfiguredRoute', (services) => {
+        const injectContextualServices = createServiceModule('injectContextualServices', (services) => {
           services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
           services.register<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
+          services.register<IRequestContext>(HttpLambdaServices.RequestContext, (current) => {
+            return {
+              container: current,
+            };
+          });
         });
 
-        const childContainer = container.createChildContainer('httpLambda', [injectConfiguredRoute]);
+        const childContainer = container.createChildContainer('httpLambda', [injectContextualServices]);
         request.context['container'] = childContainer;
       },
       after(request) {
@@ -164,7 +164,13 @@ let _currentContainer: IServiceContainer | undefined;
 
 export class HttpLambda {
   static initialize(modules: IServiceModule[] = []): BootstrappedHttpLambdaContext {
-    const container = createContainer([useTrigintaHttp, useHttpServices, useLocalization, ...modules]);
+    const container = createContainer([
+      useTrigintaHttp,
+      useHttpServices,
+      useLocalization,
+      useHttpValidation,
+      ...modules,
+    ]);
     _currentContainer = container;
     return {
       createHttpEventLambda<Output>(

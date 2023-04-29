@@ -3,4 +3,5 @@ export const HttpLambdaServices = {
   CurrentEvent: 'currentEvent',
   HttpLambdaFactory: 'HttpLambdaFactory',
   HttpResponseGenerator: 'HttpResponseGenerator',
+  RequestContext: 'requestContext',
 };

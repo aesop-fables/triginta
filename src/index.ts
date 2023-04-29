@@ -10,6 +10,9 @@ export * from './ISqsMessageHandler';
 export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
 
+export * as Localization from './localization';
+export * as Validation from './validation';
+
 import * as httpUtils from './http/invokeHttpHandler';
 import * as sqsUtils from './invokeSqsHandler';
 
