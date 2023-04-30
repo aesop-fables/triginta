@@ -5,15 +5,7 @@ import { IRequestContext } from '../http/IRequestContext';
 import { IValidatorFactory } from './IValidatorFactory';
 import { IConfiguredValidationRule } from './IConfiguredValidationRule';
 import { ValidationServices } from './ValidationServices';
-
-export interface IValidationError {
-  field: string;
-  message: string;
-}
-
-export interface IValidationResponse {
-  errors: IValidationError[];
-}
+import { IValidationFailureHandler } from './IValidationFailureHandler';
 
 export function validate(
   rules: IConfiguredValidationRule[],
@@ -23,6 +15,7 @@ export function validate(
       async before(request) {
         const container = (request.context as unknown as IRequestContext).container;
         const validator = container.get<IValidatorFactory>(ValidationServices.ValidatorFactory).create(rules);
+        const failureHandler = container.get<IValidationFailureHandler>(ValidationServices.ValidationFailureHandler);
         const model = request.event.body as unknown as object;
 
         const notification = await validator.validate(model);
@@ -30,18 +23,8 @@ export function validate(
           return;
         }
 
-        // TODO -- This should be a strategy
-        request.response = {
-          statusCode: 400,
-          body: JSON.stringify({
-            errors: notification.allMessages().map((msg) => {
-              return {
-                field: msg.field,
-                message: msg.localizedString.defaultValue,
-              } as IValidationError;
-            }),
-          } as IValidationResponse),
-        };
+        const response = await failureHandler.fail(notification);
+        request.response = response;
       },
     };
   };

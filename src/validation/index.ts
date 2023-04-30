@@ -4,6 +4,7 @@ import { Validator } from './Validator';
 import { IValidatorFactory } from './IValidatorFactory';
 import { ValidatorFactory } from './ValidatorFactory';
 import { ValidationServices } from './ValidationServices';
+import { IValidationFailureHandler, ValidatiionFailureHandler } from './IValidationFailureHandler';
 
 export * from './IValidator';
 export * from './Validator';
@@ -20,8 +21,10 @@ export * from './ValidationMessage';
 export * from './ValidationMiddleware';
 export * from './ValidationServices';
 export * from './ValidationNotification';
+export * from './IValidationFailureHandler';
 
 export const useHttpValidation = createServiceModule('useHttpValidation', (services) => {
   services.use<IValidator>(ValidationServices.Validator, Validator);
   services.use<IValidatorFactory>(ValidationServices.ValidatorFactory, ValidatorFactory);
+  services.use<IValidationFailureHandler>(ValidationServices.ValidationFailureHandler, ValidatiionFailureHandler);
 });
