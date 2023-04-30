@@ -142,5 +142,39 @@ describe('Validator', () => {
       expect(responseBody.errors[0].field).toBe('firstName');
       expect(responseBody.errors[0].message).toBe(Fugitive.defaultValue);
     });
+
+    test('passes control to endpoint if validation succeeds', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const messages: any[] = [];
+
+      HttpLambda.initialize([
+        createServiceModule('test', (services) => {
+          services.register<IEndpointRecorder>(RECORDER_KEY, {
+            recordRequest(request) {
+              messages.push(request);
+            },
+          });
+        }),
+      ]);
+
+      const container = HttpLambda.getContainer();
+      const body: TestModel = {
+        firstName: 'I AM VALID OKAY',
+      };
+
+      const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
+        configuredRoute: {
+          constructor: ValidationTestEndpoint,
+          method: 'post',
+          route: '/triginta/middlware/validation',
+        },
+        container,
+        rawPath: '/triginta/middlware/validation',
+        body,
+      })) as APIGatewayProxyStructuredResultV2;
+
+      expect(messages.length).toBe(1);
+      expect(response.statusCode).toEqual(204);
+    });
   });
 });
