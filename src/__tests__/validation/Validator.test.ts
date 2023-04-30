@@ -23,7 +23,7 @@ interface TestModel {
   firstName: string;
 }
 
-const Fugitive: LocalizedString = { key: 'Fugitive', defaultValue: 'Sounds too much like a fugitive, to me'};
+const Fugitive: LocalizedString = { key: 'Fugitive', defaultValue: 'Sounds too much like a fugitive, to me' };
 
 class TestRule implements IValidationRule {
   async validate(context: Validation.ValidationContext): Promise<void> {
