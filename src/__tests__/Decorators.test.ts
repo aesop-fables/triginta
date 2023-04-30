@@ -12,7 +12,7 @@ import {
   httpPut,
   httpDelete,
 } from '../Decorators';
-import { IConfiguredRoute } from '../IConfiguredRoute';
+import { IConfiguredRoute } from '../http/IConfiguredRoute';
 
 describe('Decorators', () => {
   describe('routing', () => {

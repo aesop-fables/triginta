@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import { createServiceModule, Newable } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
 import { getRoute, httpGet, IHttpEndpoint, IHttpEventHandler } from '..';
-import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory, IHttpResponseGenerator } from '../HttpLambda';
-import { invokeHttpHandler } from '../invokeHttpHandler';
-import { HttpLambdaServices } from '../HttpLambdaServices';
-import { IConfiguredRoute } from '../IConfiguredRoute';
+import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory, IHttpResponseGenerator } from '../http/HttpLambda';
+import { invokeHttpHandler } from '../http/invokeHttpHandler';
+import { HttpLambdaServices } from '../http/HttpLambdaServices';
+import { IConfiguredRoute } from '../http/IConfiguredRoute';
 
 interface InitializeRequest {}
 

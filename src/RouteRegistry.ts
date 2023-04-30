@@ -1,4 +1,4 @@
-import { IConfiguredRoute } from './IConfiguredRoute';
+import { IConfiguredRoute } from './http/IConfiguredRoute';
 
 export interface IRouteRegistry {
   allRoutes(): IConfiguredRoute[];

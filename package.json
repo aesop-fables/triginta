@@ -1,6 +1,6 @@
 {
   "name": "@aesop-fables/triginta",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A lightweight framework that wraps the basic infrastructure usages of AWS Lambda (SQS, Kinesis, etc.).",
   "type": "commonjs",
   "exports": {
@@ -24,15 +24,16 @@
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
-    "@aesop-fables/containr": "^0.2.4",
+    "@aesop-fables/containr": "^0.2.5",
     "@middy/core": "^4.2.7",
     "@middy/http-error-handler": "^4.2.3",
     "@middy/http-json-body-parser": "^4.2.3",
+    "@middy/util": "^4.3.1",
     "@types/aws-lambda": "^8.10.109",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.11.11",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
-    "@typescript-eslint/parser": "5.58.0",
+    "@typescript-eslint/parser": "5.59.1",
     "esbuild": "^0.17.8",
     "eslint": "8.38.0",
     "eslint-config-prettier": "^8.5.0",

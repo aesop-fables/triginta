@@ -18,9 +18,13 @@ import {
 } from 'aws-lambda';
 import middy from '@middy/core';
 import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
-import { getMiddleware, getRoute } from './Decorators';
+import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
+import { useHttpServices } from '.';
+import { useLocalization } from '../localization';
+import { IRequestContext } from './IRequestContext';
+import { useHttpValidation } from '../validation';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -87,61 +91,64 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
   createHandler<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
-    const handler = async (event: NonNoisyEvent) => {
-      const route = getRoute(newable);
-      if (!route) {
-        throw new Error('No route found for the specified endpoint');
-      }
-
-      const injectConfiguredRoute: IServiceModule = {
-        name: 'injectConfiguredRoute',
-        configureServices(services) {
-          services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
-        },
-      };
-
-      const childContainer = this.container.createChildContainer('httpLambda', [injectConfiguredRoute]);
-      const responseGenerator = childContainer.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
-      try {
-        const handler = this.container.resolve(newable);
-        const { body: request } = event;
-
-        let response: Output;
-        if (route.method !== 'get') {
-          const endpoint = handler as IHttpEndpoint<Input, Output>;
-          response = (await endpoint.handle(
-            request as Input,
-            event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
-          )) as Output;
-        } else {
-          const eventHandler = handler as IHttpEventHandler<Output>;
-          response = (await eventHandler.handle(
-            event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
-          )) as Output;
-        }
-
-        return responseGenerator.generateResponse(response);
-      } finally {
-        if (childContainer) {
-          try {
-            childContainer.dispose();
-          } catch {
-            // no-op
-          }
-        }
-      }
-    };
-
-    const middlewareMetadata = getMiddleware(newable);
-    if (middlewareMetadata) {
-      let midHandler = middy(handler);
-      middlewareMetadata.forEach((midFunc: Function) => {
-        midHandler = midHandler.use(midFunc());
-      });
-      return midHandler;
+    const route = getRoute(newable);
+    if (!route) {
+      throw new Error('No route found for the specified endpoint');
     }
 
-    return handler;
+    const handler = async (event: NonNoisyEvent, context: any) => {
+      const childContainer = context['container'] as IServiceContainer | undefined;
+      if (!childContainer) {
+        throw new Error('No container found in the context');
+      }
+
+      const responseGenerator = childContainer.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
+      const handler = childContainer.resolve(newable);
+      const { body: request } = event;
+
+      let response: Output;
+      if (route.method !== 'get') {
+        const endpoint = handler as IHttpEndpoint<Input, Output>;
+        response = (await endpoint.handle(
+          request as Input,
+          event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+        )) as Output;
+      } else {
+        const eventHandler = handler as IHttpEventHandler<Output>;
+        response = (await eventHandler.handle(
+          event as unknown as APIGatewayProxyEventV2WithRequestContext<APIGatewayEventRequestContextV2>,
+        )) as Output;
+      }
+
+      return responseGenerator.generateResponse(response);
+    };
+
+    const { container } = this;
+    const middlewareMetadata = getMiddleware(newable) ?? [];
+    let midHandler = middy(handler).use({
+      async before(request) {
+        const injectContextualServices = createServiceModule('injectContextualServices', (services) => {
+          services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
+          services.register<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
+          services.register<IRequestContext>(HttpLambdaServices.RequestContext, (current) => {
+            return {
+              container: current,
+            };
+          });
+        });
+
+        const childContainer = container.createChildContainer('httpLambda', [injectContextualServices]);
+        request.context['container'] = childContainer;
+      },
+      after(request) {
+        request.context['container']?.dispose();
+      },
+    });
+    middlewareMetadata.forEach((midFunc: Function) => {
+      midHandler = midHandler.use(midFunc());
+    });
+
+    return midHandler;
   }
 }
 
@@ -157,7 +164,13 @@ let _currentContainer: IServiceContainer | undefined;
 
 export class HttpLambda {
   static initialize(modules: IServiceModule[] = []): BootstrappedHttpLambdaContext {
-    const container = createContainer([useTrigintaHttp, ...modules]);
+    const container = createContainer([
+      useTrigintaHttp,
+      useHttpServices,
+      useLocalization,
+      useHttpValidation,
+      ...modules,
+    ]);
     _currentContainer = container;
     return {
       createHttpEventLambda<Output>(
