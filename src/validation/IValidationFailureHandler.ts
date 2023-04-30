@@ -26,6 +26,6 @@ export class ValidatiionFailureHandler implements IValidationFailureHandler {
           } as IValidationError;
         }),
       } as IValidationResponse),
-    }
+    };
   }
 }
