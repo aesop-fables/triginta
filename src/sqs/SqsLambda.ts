@@ -4,14 +4,15 @@
 import {
   createContainer,
   createServiceModule,
+  inject,
   IServiceContainer,
   IServiceModule,
   Newable,
 } from '@aesop-fables/containr';
-import { SQSEvent, SQSHandler } from 'aws-lambda';
+import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
 import middy from '@middy/core';
 import { ISqsMessageHandler, SqsOutput } from './ISqsMessageHandler';
-import { getMiddleware } from './Decorators';
+import { getMiddleware } from '../Decorators';
 import { SqsLambdaServices } from './SqsLambdaServices';
 
 export interface BootstrappedSqsLambdaContext {
@@ -103,3 +104,51 @@ export class SqsLambda {
     return _currentContainer as IServiceContainer;
   }
 }
+
+// // TRIGINTA
+// interface ISqsEventMatcher {
+//   matches(record: SQSRecord): boolean;
+//   create(record: SQSRecord): Promise<any>;
+// }
+
+// interface ISqsMessageRegistry {
+//   resolveMessage<T>(record: SQSRecord): Promise<T>;
+// }
+
+// // services.add<ISqsEventMatcher>('matchers', MySqsEventMatcher);
+// // services.use<ISqsEventMatcher>('defaultMatcher', TRigintaDefaultSqs);
+
+// class SqsMessageRegistry implements ISqsMessageRegistry {
+//   constructor(
+//     @inject('matchers') private readonly matchers: ISqsEventMatcher[],
+//     @inject('default') private readonly defaultMatcher: ISqsEventMatcher,
+//   ) {}
+
+//   async resolveMessage<T>(record: SQSRecord): Promise<T> {
+//     let matcher = this.defaultMatcher;
+//     for (let i = 0; i < this.matchers.length; i++) {
+//       const current = this.matchers[i];
+//       if (matcher.matches(record)) {
+//         matcher = current;
+//       }
+//     }
+
+//     const result = await matcher.create(record);
+//     return result;
+//   }
+// }
+
+// Chris/Sam
+// class StartJobEventMatcher implements ISqsEventMatcher {
+//   matches(type: string): boolean {
+//     return type === 'start-job';
+//   }
+
+//   create(record: SQSRecord) {
+//     return new StartJobEvent(record.messageAttributes['X-Tenant'].stringValue ?? '', '');
+//   }
+// }
+
+// SQS
+//  SQSEvent => * SQSRecord
+//  sqs.sendMessage()

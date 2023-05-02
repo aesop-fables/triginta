@@ -4,9 +4,9 @@ export * from './Decorators';
 export * from './http/HttpLambda';
 export * from './http/HttpLambdaServices';
 export { default as RouteRegistry, IRouteRegistry } from './RouteRegistry';
-export * from './SqsLambda';
-export * from './SqsLambdaServices';
-export * from './ISqsMessageHandler';
+export * from './sqs/SqsLambda';
+export * from './sqs/SqsLambdaServices';
+export * from './sqs/ISqsMessageHandler';
 export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
 
@@ -14,7 +14,7 @@ export * as Localization from './localization';
 export * as Validation from './validation';
 
 import * as httpUtils from './http/invokeHttpHandler';
-import * as sqsUtils from './invokeSqsHandler';
+import * as sqsUtils from './sqs/invokeSqsHandler';
 
 /**
  * Provides helper functions for invoking lambdas in unit/integration tests.

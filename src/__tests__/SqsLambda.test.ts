@@ -1,9 +1,7 @@
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { SQSRecord } from 'aws-lambda';
-import { ISqsMessageHandler } from '../ISqsMessageHandler';
-import { SqsLambda } from '../SqsLambda';
-import { invokeSqsHandler } from '../invokeSqsHandler';
+import { TestUtils, ISqsMessageHandler, SqsLambda } from '..';
 
 interface TestMessage {
   tenant: string;
@@ -37,7 +35,7 @@ describe('SqsLambda', () => {
     test('bootstraps the lambda', async () => {
       SqsLambda.initialize([useRecorder]);
       const container = SqsLambda.getContainer();
-      await invokeSqsHandler({
+      await TestUtils.invokeSqsHandler({
         container: SqsLambda.getContainer(),
         handler: TestHandler,
         Records: [
