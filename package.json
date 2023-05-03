@@ -34,6 +34,7 @@
     "@types/node": "^18.11.11",
     "@typescript-eslint/eslint-plugin": "^5.45.1",
     "@typescript-eslint/parser": "5.59.1",
+    "aws-sdk": "^2.1363.0",
     "esbuild": "^0.17.8",
     "eslint": "8.38.0",
     "eslint-config-prettier": "^8.5.0",
@@ -54,6 +55,7 @@
     "@middy/core": "4.x",
     "@middy/http-error-handler": "4.x",
     "@middy/http-json-body-parser": "4.x",
+    "aws-sdk": "2.x",
     "reflect-metadata": "0.1.x"
   },
   "repository": {

@@ -4,7 +4,6 @@
 import {
   createContainer,
   createServiceModule,
-  inject,
   IServiceContainer,
   IServiceModule,
   Newable,
@@ -14,42 +13,41 @@ import middy from '@middy/core';
 import { ISqsMessageHandler, SqsOutput } from './ISqsMessageHandler';
 import { getMiddleware } from '../Decorators';
 import { SqsLambdaServices } from './SqsLambdaServices';
+import { ISqsMessage } from './ISqsMessage';
+import {
+  DefaultSqsRecordMatcher,
+  ISqsMessageDeserializer,
+  ISqsRecordMatcher,
+  SqsMessageDeserializer,
+} from './RecordMatchers';
 
 export interface BootstrappedSqsLambdaContext {
-  createHandler<Message, Output extends SqsOutput = void>(
+  container: IServiceContainer;
+  createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler;
 }
 
 export interface ISqsLambdaFactory {
-  createHandler<Message, Output extends SqsOutput = void>(
+  createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler;
 }
 
-const jsonSafeParse = (text: any) => {
-  if (typeof text !== 'string') return text;
-  const firstChar = text[0];
-  if (firstChar !== '{' && firstChar !== '[' && firstChar !== '"') return text;
-  try {
-    return JSON.parse(text);
-  } catch (e) {}
-  return text;
-};
-
 export class SqsLambdaFactory implements ISqsLambdaFactory {
   constructor(private readonly container: IServiceContainer) {}
 
-  createHandler<Message, Output extends SqsOutput = void>(
+  createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler {
     const handler = async (event: SQSEvent) => {
       const childContainer = this.container.createChildContainer('sqsLambda');
       try {
-        const handler = this.container.resolve(newable);
+        const handler = childContainer.resolve(newable);
+        const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
         for (let i = 0; i < event.Records.length; i++) {
           const record = event.Records[i];
-          const message = jsonSafeParse(record.body);
+          const message = await deserializer.deserializeMessage<Message>(record);
           await handler.handle(message as Message, record, event);
         }
       } finally {
@@ -76,11 +74,26 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
   }
 }
 
+// Here until we fix containr's array stuff
+// I think we might want to just use a different inject call for arrays
+class NoOpMatcher implements ISqsRecordMatcher {
+  matches(): boolean {
+    return false;
+  }
+  deserializeMessage<Message extends ISqsMessage>(): Promise<Message> {
+    throw new Error('Method not implemented.');
+  }
+}
+
 export const useTrigintaSqs = createServiceModule('triginta/sqs', (services) => {
   services.register<ISqsLambdaFactory>(
     SqsLambdaServices.SqsLambdaFactory,
     (container) => new SqsLambdaFactory(container),
   );
+
+  services.add<ISqsRecordMatcher>(SqsLambdaServices.RecordMatchers, NoOpMatcher);
+  services.use<ISqsRecordMatcher>(SqsLambdaServices.DefaultRecordMatcher, DefaultSqsRecordMatcher);
+  services.use<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer, SqsMessageDeserializer);
 });
 
 let _currentContainer: IServiceContainer | undefined;
@@ -91,7 +104,8 @@ export class SqsLambda {
     _currentContainer = container;
 
     return {
-      createHandler<Message, Output extends SqsOutput = void>(
+      container,
+      createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
         newable: Newable<ISqsMessageHandler<Message, Output>>,
       ): SQSHandler {
         const factory = container.get<ISqsLambdaFactory>(SqsLambdaServices.SqsLambdaFactory);
@@ -104,51 +118,3 @@ export class SqsLambda {
     return _currentContainer as IServiceContainer;
   }
 }
-
-// // TRIGINTA
-// interface ISqsEventMatcher {
-//   matches(record: SQSRecord): boolean;
-//   create(record: SQSRecord): Promise<any>;
-// }
-
-// interface ISqsMessageRegistry {
-//   resolveMessage<T>(record: SQSRecord): Promise<T>;
-// }
-
-// // services.add<ISqsEventMatcher>('matchers', MySqsEventMatcher);
-// // services.use<ISqsEventMatcher>('defaultMatcher', TRigintaDefaultSqs);
-
-// class SqsMessageRegistry implements ISqsMessageRegistry {
-//   constructor(
-//     @inject('matchers') private readonly matchers: ISqsEventMatcher[],
-//     @inject('default') private readonly defaultMatcher: ISqsEventMatcher,
-//   ) {}
-
-//   async resolveMessage<T>(record: SQSRecord): Promise<T> {
-//     let matcher = this.defaultMatcher;
-//     for (let i = 0; i < this.matchers.length; i++) {
-//       const current = this.matchers[i];
-//       if (matcher.matches(record)) {
-//         matcher = current;
-//       }
-//     }
-
-//     const result = await matcher.create(record);
-//     return result;
-//   }
-// }
-
-// Chris/Sam
-// class StartJobEventMatcher implements ISqsEventMatcher {
-//   matches(type: string): boolean {
-//     return type === 'start-job';
-//   }
-
-//   create(record: SQSRecord) {
-//     return new StartJobEvent(record.messageAttributes['X-Tenant'].stringValue ?? '', '');
-//   }
-// }
-
-// SQS
-//  SQSEvent => * SQSRecord
-//  sqs.sendMessage()

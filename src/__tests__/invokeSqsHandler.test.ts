@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { ISqsMessageHandler, SqsLambda, TestUtils } from '..';
-import { SQSEvent, SQSRecord } from 'aws-lambda';
+import { SQSEvent, SQSMessageAttributes, SQSRecord } from 'aws-lambda';
+import { ISqsMessage } from '../sqs/ISqsMessage';
 
 const { invokeSqsHandler } = TestUtils;
 const RECORDER_KEY = 'eventRecorder';
@@ -12,12 +13,11 @@ interface IEndpointRecorder {
   recordRequest(request: any): void;
 }
 
-interface ParsingMessage {
+interface ParsingMessage extends ISqsMessage {
   foo: string;
   bar: string;
 }
 
-// @useMiddleware(jsonBodyParser)
 class ParsingTestEndpoint implements ISqsMessageHandler<ParsingMessage> {
   constructor(@inject(RECORDER_KEY) private readonly events: IEndpointRecorder) {}
   async handle(message: ParsingMessage, record: SQSRecord, event: SQSEvent): Promise<void> {
@@ -50,7 +50,14 @@ describe('invokeSqsHandler', () => {
       const message: ParsingMessage = {
         foo: 'bar',
         bar: 'foo',
-      };
+        type: '',
+        getAttributes: function (): SQSMessageAttributes {
+          throw new Error('Function not implemented.');
+        },
+        getBody: function (): string {
+          throw new Error('Function not implemented.');
+        },
+      } as ParsingMessage;
 
       const body = JSON.stringify(message);
 
