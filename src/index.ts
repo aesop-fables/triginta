@@ -7,6 +7,8 @@ export { default as RouteRegistry, IRouteRegistry } from './RouteRegistry';
 export * from './sqs/SqsLambda';
 export * from './sqs/SqsLambdaServices';
 export * from './sqs/ISqsMessageHandler';
+export * from './sqs/RecordMatchers';
+export * from './sqs/ISqsMessage';
 export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
 

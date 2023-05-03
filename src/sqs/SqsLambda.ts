@@ -4,6 +4,7 @@
 import {
   createContainer,
   createServiceModule,
+  createServiceModuleWithOptions,
   IServiceContainer,
   IServiceModule,
   Newable,
@@ -85,22 +86,42 @@ class NoOpMatcher implements ISqsRecordMatcher {
   }
 }
 
-export const useTrigintaSqs = createServiceModule('triginta/sqs', (services) => {
-  services.register<ISqsLambdaFactory>(
-    SqsLambdaServices.SqsLambdaFactory,
-    (container) => new SqsLambdaFactory(container),
-  );
+export interface TrigintaSqsOptions {
+  matchers?: ISqsRecordMatcher[];
+}
 
-  services.add<ISqsRecordMatcher>(SqsLambdaServices.RecordMatchers, NoOpMatcher);
-  services.use<ISqsRecordMatcher>(SqsLambdaServices.DefaultRecordMatcher, DefaultSqsRecordMatcher);
-  services.use<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer, SqsMessageDeserializer);
-});
+export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaSqsOptions>(
+  'triginta/sqs',
+  (services, options) => {
+    services.register<ISqsLambdaFactory>(
+      SqsLambdaServices.SqsLambdaFactory,
+      (container) => new SqsLambdaFactory(container),
+    );
+
+    const { matchers = [] } = options;
+    if (matchers.length === 0) {
+      matchers.push(new NoOpMatcher());
+    }
+
+    matchers.forEach((matcher) => {
+      services.addDependency<ISqsRecordMatcher>(SqsLambdaServices.RecordMatchers, matcher);
+    });
+    services.use<ISqsRecordMatcher>(SqsLambdaServices.DefaultRecordMatcher, DefaultSqsRecordMatcher);
+    services.use<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer, SqsMessageDeserializer);
+  },
+);
 
 let _currentContainer: IServiceContainer | undefined;
 
+export interface SqsLambdaBootstrapExpression {
+  matchers?: ISqsRecordMatcher[];
+  modules?: IServiceModule[];
+}
+
 export class SqsLambda {
-  static initialize(modules: IServiceModule[] = []): BootstrappedSqsLambdaContext {
-    const container = createContainer([useTrigintaSqs, ...modules]);
+  static initialize(expression: SqsLambdaBootstrapExpression): BootstrappedSqsLambdaContext {
+    const { matchers, modules = [] } = expression;
+    const container = createContainer([useTrigintaSqs({ matchers }), ...modules]);
     _currentContainer = container;
 
     return {

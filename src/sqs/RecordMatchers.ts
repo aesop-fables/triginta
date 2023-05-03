@@ -1,4 +1,4 @@
-import { SQSRecord } from 'aws-lambda';
+import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
 import { ISqsMessage, TrigintaMessageHeaders } from './ISqsMessage';
 import { SqsLambdaServices } from './SqsLambdaServices';
 import { inject } from '@aesop-fables/containr';
@@ -20,6 +20,10 @@ const jsonSafeParse = (text: any) => {
   return text;
 };
 
+export function retrieveMessageType(messageAttributes: SQSMessageAttributes): string {
+  return messageAttributes[TrigintaMessageHeaders.MessageType]?.stringValue ?? '';
+}
+
 export class DefaultSqsRecordMatcher implements ISqsRecordMatcher {
   matches() {
     return true;
@@ -34,7 +38,7 @@ export class DefaultSqsRecordMatcher implements ISqsRecordMatcher {
     const { messageAttributes = {} } = record;
     return {
       ...body,
-      type: messageAttributes[TrigintaMessageHeaders.MessageType]?.stringValue ?? '',
+      type: retrieveMessageType(messageAttributes),
     } as Message;
   }
 }
@@ -58,4 +62,55 @@ export class SqsMessageDeserializer implements ISqsMessageDeserializer {
     }
     return this.defaultMatcher.deserializeMessage(record);
   }
+}
+
+export declare type MessageConfigAttributes<Message> = {
+  [Property in keyof Message]: string;
+};
+
+export declare type MessageFactory<Message, Body> = (
+  attributes: Partial<MessageConfigAttributes<Message>>,
+  body: Body,
+) => Promise<Message>;
+
+export declare type MessageConfig<Message, Options> = {
+  type: string;
+  attributes: Partial<MessageConfigAttributes<Message>>;
+  constructUsing: MessageFactory<Message, Options>;
+};
+
+export declare type MessageExpression<Message extends ISqsMessage> = Omit<
+  Message,
+  'getAttributes' | 'getBody' | 'getData'
+>;
+
+// Test coverage in SqsLambda.test.ts
+export function createMatcher<Message extends ISqsMessage, Options>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  configuration: MessageConfig<MessageExpression<Message>, Options>,
+): ISqsRecordMatcher {
+  const { attributes: attributeMap, constructUsing, type } = configuration;
+
+  const defaultMatcher = new DefaultSqsRecordMatcher();
+  return {
+    matches(record) {
+      const { messageAttributes = {} } = record;
+      const messageType = retrieveMessageType(messageAttributes);
+      return messageType === type;
+    },
+    async deserializeMessage<T extends ISqsMessage>(record: SQSRecord): Promise<T> {
+      const attributes: Partial<MessageConfigAttributes<MessageExpression<Message>>> = {};
+      Object.entries(attributeMap).forEach(([key, val]) => {
+        const { messageAttributes = {} } = record;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (attributes as any)[key] = messageAttributes[val]?.stringValue ?? '';
+      });
+      const body = await defaultMatcher.deserializeMessage<T>(record);
+      const result = (await constructUsing(
+        attributes,
+        body as unknown as Options,
+      )) as unknown as Message as unknown as T;
+      return result;
+    },
+  } as ISqsRecordMatcher;
 }

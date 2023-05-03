@@ -33,18 +33,20 @@ describe('invokeSqsHandler', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
 
-      SqsLambda.initialize([
-        createServiceModule('test', (services) => {
-          services.register<IEndpointRecorder>(RECORDER_KEY, {
-            recordEvent(event) {
-              events.push(event);
-            },
-            recordRequest(request) {
-              messages.push(request);
-            },
-          });
-        }),
-      ]);
+      SqsLambda.initialize({
+        modules: [
+          createServiceModule('test', (services) => {
+            services.register<IEndpointRecorder>(RECORDER_KEY, {
+              recordEvent(event) {
+                events.push(event);
+              },
+              recordRequest(request) {
+                messages.push(request);
+              },
+            });
+          }),
+        ],
+      });
 
       const container = SqsLambda.getContainer();
       const message: ParsingMessage = {
