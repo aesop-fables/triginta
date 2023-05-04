@@ -21,6 +21,8 @@ import {
   ISqsRecordMatcher,
   SqsMessageDeserializer,
 } from './RecordMatchers';
+import { ISqsPublisher, SqsPublisher } from './SqsPublisher';
+import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
 
 export interface BootstrappedSqsLambdaContext {
   container: IServiceContainer;
@@ -108,6 +110,8 @@ export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaSqsOptions>
     });
     services.use<ISqsRecordMatcher>(SqsLambdaServices.DefaultRecordMatcher, DefaultSqsRecordMatcher);
     services.use<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer, SqsMessageDeserializer);
+    services.use<ISqsPublisher>(SqsLambdaServices.SqsPublisher, SqsPublisher);
+    services.use<IMessagePublisher>(SqsLambdaServices.MessagePublisher, MessagePublisher);
   },
 );
 
