@@ -8,7 +8,7 @@ import { SqsLambdaServices } from '../sqs/SqsLambdaServices';
 import { MessagePublisher } from '../sqs/MessagePublisher';
 import { InteractionContext, createInteractionContext } from '@aesop-fables/containr-testing';
 
-class TestStartUpEvent extends BaseSqsMessage {
+class TestStartUpMessage extends BaseSqsMessage {
   constructor(readonly type: string, readonly jobId: string) {
     super(type);
   }
@@ -25,13 +25,13 @@ class TestStartUpEvent extends BaseSqsMessage {
   }
 }
 
-class TestEvent extends BaseSqsMessage {
+class TestMessage extends BaseSqsMessage {
   constructor(readonly type: string) {
     super(type);
   }
 }
 
-class TestBodyEvent extends BaseSqsMessage {
+class TestBodyMessage extends BaseSqsMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(readonly type: string, readonly jobId: string, readonly body: any) {
     super(type);
@@ -56,7 +56,7 @@ class TestBodyEvent extends BaseSqsMessage {
 
 describe('MessagePublisher', () => {
   let context: InteractionContext<MessagePublisher>;
-  let event: BaseSqsMessage;
+  let testMessage: BaseSqsMessage;
   let message: SendMessageRequest;
   let result: SendMessageResult;
   const queue = 'StartJob';
@@ -74,7 +74,7 @@ describe('MessagePublisher', () => {
   });
 
   test('MessagePublisher creates expected message', async () => {
-    event = new TestStartUpEvent(type, jobId);
+    testMessage = new TestStartUpMessage(type, jobId);
     message = {
       MessageAttributes: {
         'X-Message-Type': {
@@ -106,7 +106,7 @@ describe('MessagePublisher', () => {
       .sendMessage.calledWith(any(), any(), any())
       .mockResolvedValue(Promise.resolve(result));
 
-    const response = await context.classUnderTest.publish(event, config);
+    const response = await context.classUnderTest.publish(testMessage, config);
     expect(response).toEqual(result);
     // eslint-disable-next-line prettier/prettier
     expect(
@@ -115,7 +115,7 @@ describe('MessagePublisher', () => {
   });
 
   test('Message does not contain JobID', async () => {
-    event = new TestEvent(type);
+    testMessage = new TestMessage(type);
     message = {
       MessageAttributes: {
         'X-Message-Type': {
@@ -143,7 +143,7 @@ describe('MessagePublisher', () => {
       .sendMessage.calledWith(any(), any(), any())
       .mockResolvedValue(Promise.resolve(result));
 
-    const response = await context.classUnderTest.publish(event, config);
+    const response = await context.classUnderTest.publish(testMessage, config);
     expect(response).toEqual(result);
     // eslint-disable-next-line prettier/prettier
     expect(
@@ -152,7 +152,7 @@ describe('MessagePublisher', () => {
   });
 
   test('Message contains a body', async () => {
-    event = new TestBodyEvent(type, jobId, body);
+    testMessage = new TestBodyMessage(type, jobId, body);
     message = {
       MessageAttributes: {
         'X-Message-Type': {
@@ -184,7 +184,7 @@ describe('MessagePublisher', () => {
       .sendMessage.calledWith(any(), any(), any())
       .mockResolvedValue(Promise.resolve(result));
 
-    const response = await context.classUnderTest.publish(event, config);
+    const response = await context.classUnderTest.publish(testMessage, config);
     expect(response).toEqual(result);
     // eslint-disable-next-line prettier/prettier
     expect(
