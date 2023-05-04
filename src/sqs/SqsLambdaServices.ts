@@ -5,4 +5,5 @@ export const SqsLambdaServices = {
   RecordMatchers: 'RecordMatchers',
   MessagePublisher: 'MessagePublisher',
   SqsPublisher: 'SqsPublisher',
+  SqsSettings: 'SqsSettings',
 };
