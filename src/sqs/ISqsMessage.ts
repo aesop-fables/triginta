@@ -1,9 +1,12 @@
 import { SQSMessageAttributes } from 'aws-lambda';
+import { IQueue } from './IQueue';
+import { resolveEnvironmentSettings } from '../resolveEnvironmentSettings';
 
 export interface ISqsMessage {
   type: string;
   getAttributes(): SQSMessageAttributes;
   getBody(): string;
+  getQueueUrl(): string;
 }
 
 export const TrigintaMessageHeaders = {
@@ -11,7 +14,12 @@ export const TrigintaMessageHeaders = {
 };
 
 export abstract class BaseSqsMessage implements ISqsMessage {
-  constructor(readonly type: string) {}
+  constructor(readonly type: string, readonly queue: IQueue) {}
+
+  getQueueUrl(): string {
+    const { queue } = resolveEnvironmentSettings({ queue: this.queue.toEnvExpression() });
+    return queue as string;
+  }
 
   getAttributes() {
     const attributes: SQSMessageAttributes = {

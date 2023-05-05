@@ -10,6 +10,7 @@ import {
   TrigintaMessageHeaders,
   createMatcher,
 } from '..';
+import { IQueue, Queue } from '../sqs/IQueue';
 
 interface TestMessage extends ISqsMessage {
   type: string;
@@ -41,10 +42,11 @@ interface TenantOptions {
 
 const TenantKey = 'X-Tenant';
 const SpinUpMessageType = 'spin-up';
+const JobQueue: IQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
 
 class SpinUpTenantMessage extends BaseSqsMessage {
   constructor(readonly tenant: string, readonly options: TenantOptions) {
-    super(SpinUpMessageType);
+    super(SpinUpMessageType, JobQueue);
   }
 
   getAttributes() {
