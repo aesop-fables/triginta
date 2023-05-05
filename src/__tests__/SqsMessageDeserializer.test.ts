@@ -2,14 +2,17 @@ import 'reflect-metadata';
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
 import { BaseSqsMessage, ISqsMessage, TrigintaMessageHeaders } from '../sqs/ISqsMessage';
 import { DefaultSqsRecordMatcher, ISqsRecordMatcher, SqsMessageDeserializer } from '../sqs/RecordMatchers';
+import { IQueue, Queue } from '../sqs/IQueue';
 
 interface TestMessage extends ISqsMessage {
   foo: string;
 }
 
+const JobQueue: IQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
+
 class ComplexMessage extends BaseSqsMessage {
   constructor(readonly tenant: string) {
-    super('complex');
+    super('complex', JobQueue);
   }
 }
 

@@ -10,7 +10,7 @@ export interface ISqsPublisher {
 
 export class SqsPublisher implements ISqsPublisher {
   private readonly sqs: AWS.SQS;
-  constructor(@inject(SqsLambdaServices.SqsSettings) private readonly settings: SqsSettings){
+  constructor(@inject(SqsLambdaServices.SqsSettings) private readonly settings: SqsSettings) {
     this.sqs = new AWS.SQS({
       region: this.settings.region,
       apiVersion: this.settings.apiVersion,

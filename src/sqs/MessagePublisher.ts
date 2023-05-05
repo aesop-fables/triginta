@@ -5,14 +5,8 @@ import { SQSMessageAttributes } from 'aws-lambda';
 import { SqsLambdaServices } from './SqsLambdaServices';
 import { ISqsMessage } from './ISqsMessage';
 
-export interface ConfigOptions {
-  region: string;
-  queue: string;
-  apiVersion: string;
-}
-
 export interface IMessagePublisher {
-  publish(event: ISqsMessage, config: ConfigOptions): Promise<SendMessageResult>;
+  publish(event: ISqsMessage): Promise<SendMessageResult>;
 }
 
 export class MessagePublisher implements IMessagePublisher {
@@ -21,14 +15,14 @@ export class MessagePublisher implements IMessagePublisher {
     @inject(SqsLambdaServices.SqsPublisher) private readonly sqsPublisher: SqsPublisher,
   ) {}
 
-  async publish(event: ISqsMessage, config: ConfigOptions): Promise<SendMessageResult> {
+  async publish(event: ISqsMessage): Promise<SendMessageResult> {
     const message: SendMessageRequest = {
       MessageAttributes: messageTypeConverter(event.getAttributes()),
       MessageBody: event.getBody(),
       QueueUrl: config.queue,
     };
 
-    return this.sqsPublisher.sendMessage(message, config.region, config.apiVersion);
+    return this.sqsPublisher.sendMessage(message);
   }
 }
 

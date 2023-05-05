@@ -23,6 +23,7 @@ import {
 } from './RecordMatchers';
 import { ISqsPublisher, SqsPublisher } from './SqsPublisher';
 import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
+import { SqsSettings } from './SqsSettings';
 
 export interface BootstrappedSqsLambdaContext {
   container: IServiceContainer;
@@ -108,6 +109,7 @@ export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaSqsOptions>
     matchers.forEach((matcher) => {
       services.addDependency<ISqsRecordMatcher>(SqsLambdaServices.RecordMatchers, matcher);
     });
+    services.register<SqsSettings>(SqsLambdaServices.SqsSettings, {} as SqsSettings);
     services.use<ISqsRecordMatcher>(SqsLambdaServices.DefaultRecordMatcher, DefaultSqsRecordMatcher);
     services.use<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer, SqsMessageDeserializer);
     services.use<ISqsPublisher>(SqsLambdaServices.SqsPublisher, SqsPublisher);
