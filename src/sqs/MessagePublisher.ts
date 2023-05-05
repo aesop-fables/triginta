@@ -15,11 +15,11 @@ export class MessagePublisher implements IMessagePublisher {
     @inject(SqsLambdaServices.SqsPublisher) private readonly sqsPublisher: SqsPublisher,
   ) {}
 
-  async publish(event: ISqsMessage): Promise<SendMessageResult> {
+  async publish(sqsMessage: ISqsMessage): Promise<SendMessageResult> {
     const message: SendMessageRequest = {
-      MessageAttributes: messageTypeConverter(event.getAttributes()),
-      MessageBody: event.getBody(),
-      QueueUrl: config.queue,
+      MessageAttributes: messageTypeConverter(sqsMessage.getAttributes()),
+      MessageBody: sqsMessage.getBody(),
+      QueueUrl: sqsMessage.getQueueUrl(),
     };
 
     return this.sqsPublisher.sendMessage(message);

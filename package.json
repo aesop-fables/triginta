@@ -46,8 +46,7 @@
     "prettier": "^2.8.1",
     "reflect-metadata": "^0.1.13",
     "ts-jest": "29.1.0",
-    "typescript": "4.9.5",
-    "@aesop-fables/containr-dynamofx": "^0.2.0"
+    "typescript": "4.9.5"
   },
   "files": [
     "lib/**/*"

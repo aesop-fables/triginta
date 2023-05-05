@@ -5,7 +5,7 @@ import { SqsLambdaServices } from './SqsLambdaServices';
 import { SqsSettings } from './SqsSettings';
 
 export interface ISqsPublisher {
-  sendMessage(message: SendMessageRequest, region: string, apiVersion: string): Promise<SendMessageResult>;
+  sendMessage(message: SendMessageRequest): Promise<SendMessageResult>;
 }
 
 export class SqsPublisher implements ISqsPublisher {

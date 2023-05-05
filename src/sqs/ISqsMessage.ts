@@ -1,11 +1,12 @@
 import { SQSMessageAttributes } from 'aws-lambda';
-import { resolveEnvironmentSettings } from '@aesop-fables/containr-dynamofx';
 import { IQueue } from './IQueue';
+import { resolveEnvironmentSettings } from '../resolveEnvironmentSettings';
 
 export interface ISqsMessage {
   type: string;
   getAttributes(): SQSMessageAttributes;
   getBody(): string;
+  getQueueUrl(): string;
 }
 
 export const TrigintaMessageHeaders = {

@@ -7,10 +7,13 @@ import { SQSMessageAttributes } from 'aws-lambda';
 import { SqsLambdaServices } from '../sqs/SqsLambdaServices';
 import { MessagePublisher } from '../sqs/MessagePublisher';
 import { InteractionContext, createInteractionContext } from '@aesop-fables/containr-testing';
+import { IQueue, Queue } from '../sqs/IQueue';
+
+const jobQueue: IQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
 
 class TestStartUpMessage extends BaseSqsMessage {
   constructor(readonly type: string, readonly jobId: string) {
-    super(type);
+    super(type, jobQueue);
   }
 
   getAttributes(): SQSMessageAttributes {
@@ -27,14 +30,14 @@ class TestStartUpMessage extends BaseSqsMessage {
 
 class TestMessage extends BaseSqsMessage {
   constructor(readonly type: string) {
-    super(type);
+    super(type, jobQueue);
   }
 }
 
 class TestBodyMessage extends BaseSqsMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(readonly type: string, readonly jobId: string, readonly body: any) {
-    super(type);
+    super(type, jobQueue);
   }
 
   getAttributes(): SQSMessageAttributes {
@@ -59,7 +62,7 @@ describe('MessagePublisher', () => {
   let testMessage: BaseSqsMessage;
   let message: SendMessageRequest;
   let result: SendMessageResult;
-  const queue = 'StartJob';
+  const queue = 'job.job';
   const type = 'start-job';
   const jobId = '1234';
   const region = 'region';
@@ -94,24 +97,18 @@ describe('MessagePublisher', () => {
       MessageId: 'HappyPath',
     };
 
-    const config = {
-      region,
-      queue,
-      apiVersion,
-    };
-
     // eslint-disable-next-line prettier/prettier
     context
       .mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher)
-      .sendMessage.calledWith(any(), any(), any())
+      .sendMessage.calledWith(any())
       .mockResolvedValue(Promise.resolve(result));
 
-    const response = await context.classUnderTest.publish(testMessage, config);
+    const response = await context.classUnderTest.publish(testMessage);
     expect(response).toEqual(result);
     // eslint-disable-next-line prettier/prettier
     expect(
       context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
-    ).toHaveBeenCalledWith(message, region, apiVersion);
+    ).toHaveBeenCalledWith(message);
   });
 
   test('Message does not contain JobID', async () => {
@@ -131,24 +128,18 @@ describe('MessagePublisher', () => {
       MessageId: 'HappyPath',
     };
 
-    const config = {
-      region,
-      queue,
-      apiVersion,
-    };
-
     // eslint-disable-next-line prettier/prettier
     context
       .mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher)
-      .sendMessage.calledWith(any(), any(), any())
+      .sendMessage.calledWith(any())
       .mockResolvedValue(Promise.resolve(result));
 
-    const response = await context.classUnderTest.publish(testMessage, config);
+    const response = await context.classUnderTest.publish(testMessage);
     expect(response).toEqual(result);
     // eslint-disable-next-line prettier/prettier
     expect(
       context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
-    ).toHaveBeenCalledWith(message, region, apiVersion);
+    ).toHaveBeenCalledWith(message);
   });
 
   test('Message contains a body', async () => {
@@ -172,23 +163,17 @@ describe('MessagePublisher', () => {
       MessageId: 'HappyPath',
     };
 
-    const config = {
-      region,
-      queue,
-      apiVersion,
-    };
-
     // eslint-disable-next-line prettier/prettier
     context
       .mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher)
-      .sendMessage.calledWith(any(), any(), any())
+      .sendMessage.calledWith(any())
       .mockResolvedValue(Promise.resolve(result));
 
-    const response = await context.classUnderTest.publish(testMessage, config);
+    const response = await context.classUnderTest.publish(testMessage);
     expect(response).toEqual(result);
     // eslint-disable-next-line prettier/prettier
     expect(
       context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
-    ).toHaveBeenCalledWith(message, region, apiVersion);
+    ).toHaveBeenCalledWith(message);
   });
 });

@@ -1,5 +1,5 @@
-import { SettingsExpression } from '@aesop-fables/containr-dynamofx';
 import { CreateQueueRequest } from 'aws-sdk/clients/sqs';
+import { SettingsExpression } from '../resolveEnvironmentSettings';
 
 export interface IQueue extends CreateQueueRequest {
   toEnvExpression(): SettingsExpression<string>;
