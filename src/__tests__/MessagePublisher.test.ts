@@ -65,8 +65,6 @@ describe('MessagePublisher', () => {
   const queue = 'job.job';
   const type = 'start-job';
   const jobId = '1234';
-  const region = 'region';
-  const apiVersion = '123456';
   const body = {
     firstName: 'greatest',
     lastName: 'ever',

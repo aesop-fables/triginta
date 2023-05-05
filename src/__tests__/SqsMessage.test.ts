@@ -32,4 +32,11 @@ describe('BaseSqsMessage', () => {
       expect(message.getBody()).toBe(JSON.stringify({ foo: 'bar' }));
     });
   });
+
+  describe('getQueueUrl()', () => {
+    test('returns QueueUrl from IQueue', () => {
+      const message = new PassThruSqsMessage('test-message', JobQueue);
+      expect(message.getQueueUrl()).toBe('job.job');
+    });
+  });
 });
