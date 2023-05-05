@@ -35,7 +35,7 @@ describe('BaseSqsMessage', () => {
 
   describe('getQueueUrl() without environment variable', () => {
     test('returns QueueUrl from IQueue', () => {
-      JobQueue =  Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
+      JobQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
       const message = new PassThruSqsMessage('test-message', JobQueue);
       expect(message.getQueueUrl()).toBe('job.job');
     });
@@ -44,7 +44,7 @@ describe('BaseSqsMessage', () => {
   describe('getQueueUrl() with environment variable', () => {
     test('returns QueueUrl from IQueue', () => {
       process.env.JOB_QUEUE_URL = 'test.job';
-      JobQueue =  Queue.for('job', 'JOB_QUEUE_URL');
+      JobQueue = Queue.for('job', 'JOB_QUEUE_URL');
       const message = new PassThruSqsMessage('test-message', JobQueue);
       expect(message.getQueueUrl()).toBe('test.job');
     });
