@@ -3,4 +3,7 @@ export const SqsLambdaServices = {
   DefaultRecordMatcher: 'DefaultRecordMatcher',
   MessageDeserializer: 'MessageDeserializer',
   RecordMatchers: 'RecordMatchers',
+  MessagePublisher: 'MessagePublisher',
+  SqsPublisher: 'SqsPublisher',
+  SqsSettings: 'SqsSettings',
 };
