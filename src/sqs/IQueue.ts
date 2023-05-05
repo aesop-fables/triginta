@@ -17,5 +17,3 @@ export class Queue {
     } as IQueue;
   }
 }
-
-export const StartDovetailJobQueue: IQueue = Queue.for('start-dovetail-job', 'START_DT_JOB_QUEUE_URL');
