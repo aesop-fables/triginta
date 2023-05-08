@@ -15,7 +15,7 @@ export * from './sqs/IQueue';
 export * from './sqs/SqsPublisher';
 export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
-export * from './ResolveEnvironmentSettings';
+export * from './resolveEnvironmentSettings';
 
 export * as Localization from './localization';
 export * as Validation from './validation';

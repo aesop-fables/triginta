@@ -1,5 +1,5 @@
 import { CreateQueueRequest } from 'aws-sdk/clients/sqs';
-import { SettingsExpression } from '../ResolveEnvironmentSettings';
+import { SettingsExpression } from '../resolveEnvironmentSettings';
 
 export interface IQueue extends CreateQueueRequest {
   toEnvExpression(): SettingsExpression<string>;
