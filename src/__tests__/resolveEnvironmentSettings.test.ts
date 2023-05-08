@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { resolveEnvironmentSettings } from '..';
 
 interface TestSettings {
