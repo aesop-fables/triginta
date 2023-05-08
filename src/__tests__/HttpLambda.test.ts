@@ -1,11 +1,19 @@
 import 'reflect-metadata';
 import { createServiceModule, Newable } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
-import { getRoute, httpGet, IHttpEndpoint, IHttpEventHandler } from '..';
-import { HttpLambda, HttpLambdaFactory, IHttpLambdaFactory, IHttpResponseGenerator } from '../http/HttpLambda';
-import { invokeHttpHandler } from '../http/invokeHttpHandler';
-import { HttpLambdaServices } from '../http/HttpLambdaServices';
-import { IConfiguredRoute } from '../http/IConfiguredRoute';
+import {
+  getRoute,
+  httpGet,
+  IHttpEndpoint,
+  IHttpEventHandler,
+  HttpLambda,
+  HttpLambdaFactory,
+  IHttpLambdaFactory,
+  IHttpResponseGenerator,
+  HttpLambdaServices,
+  IConfiguredRoute,
+  TestUtils,
+} from '..';
 
 interface InitializeRequest {}
 
@@ -29,7 +37,7 @@ describe('HttpLambda', () => {
   describe('initialize', () => {
     test('no service modules', async () => {
       HttpLambda.initialize();
-      const response = await invokeHttpHandler({
+      const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
         container: HttpLambda.getContainer(),
         rawPath: '/http-lambda/initialize',
@@ -40,7 +48,7 @@ describe('HttpLambda', () => {
 
     test('no input model', async () => {
       HttpLambda.initialize();
-      const response = await invokeHttpHandler({
+      const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeWithoutInputEndpoint) as IConfiguredRoute,
         container: HttpLambda.getContainer(),
         headers: { 'x-message': 'sans-input!' },
@@ -80,7 +88,7 @@ describe('HttpLambda', () => {
       });
 
       HttpLambda.initialize([useCustomFactory]);
-      const response = await invokeHttpHandler({
+      const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
         container: HttpLambda.getContainer(),
         rawPath: '/http-lambda/initialize',
@@ -116,7 +124,7 @@ describe('HttpLambda', () => {
       });
 
       HttpLambda.initialize([useCustomFactory]);
-      const response = await invokeHttpHandler({
+      const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
         container: HttpLambda.getContainer(),
         rawPath: '/http-lambda/initialize',

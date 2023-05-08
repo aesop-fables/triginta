@@ -1,8 +1,7 @@
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { ISqsMessageHandler, SqsLambda, TestUtils } from '..';
+import { ISqsMessageHandler, SqsLambda, TestUtils, ISqsMessage } from '..';
 import { SQSEvent, SQSMessageAttributes, SQSRecord } from 'aws-lambda';
-import { ISqsMessage } from '../sqs/ISqsMessage';
 
 const { invokeSqsHandler } = TestUtils;
 const RECORDER_KEY = 'eventRecorder';

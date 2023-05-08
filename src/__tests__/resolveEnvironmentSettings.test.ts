@@ -1,4 +1,4 @@
-import { resolveEnvironmentSettings } from '../resolveEnvironmentSettings';
+import { resolveEnvironmentSettings } from '..';
 
 interface TestSettings {
   foo: string;

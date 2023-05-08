@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { createServiceModuleWithOptions } from '@aesop-fables/containr';
-import { HttpLambdaServices } from '..';
-import { HttpLambda, IHttpResponseGenerator } from '../http/HttpLambda';
-import { IConfiguredRoute } from '../http/IConfiguredRoute';
+import { HttpLambdaServices, HttpLambda, IHttpResponseGenerator, IConfiguredRoute } from '..';
 
 const testModule = createServiceModuleWithOptions<IConfiguredRoute>('testModule', (services, route) =>
   services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route),
