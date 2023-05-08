@@ -1,8 +1,15 @@
 import 'reflect-metadata';
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
-import { BaseSqsMessage, ISqsMessage, TrigintaMessageHeaders } from '../sqs/ISqsMessage';
-import { DefaultSqsRecordMatcher, ISqsRecordMatcher, SqsMessageDeserializer } from '../sqs/RecordMatchers';
-import { IQueue, Queue } from '../sqs/IQueue';
+import {
+  BaseSqsMessage,
+  ISqsMessage,
+  TrigintaMessageHeaders,
+  DefaultSqsRecordMatcher,
+  ISqsRecordMatcher,
+  SqsMessageDeserializer,
+  IQueue,
+  Queue,
+} from '..';
 
 interface TestMessage extends ISqsMessage {
   foo: string;

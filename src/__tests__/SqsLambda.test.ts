@@ -9,8 +9,9 @@ import {
   ISqsMessage,
   TrigintaMessageHeaders,
   createMatcher,
+  IQueue,
+  Queue,
 } from '..';
-import { IQueue, Queue } from '../sqs/IQueue';
 
 interface TestMessage extends ISqsMessage {
   type: string;

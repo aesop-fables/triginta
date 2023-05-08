@@ -1,4 +1,4 @@
-import { IQueue, Queue } from '../sqs/IQueue';
+import { IQueue, Queue } from '..';
 
 describe('Queue', () => {
   const name = 'test';

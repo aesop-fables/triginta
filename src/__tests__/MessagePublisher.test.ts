@@ -1,13 +1,9 @@
 import 'reflect-metadata';
 import { any } from 'jest-mock-extended';
-import { ISqsPublisher } from '../sqs/SqsPublisher';
 import { SendMessageRequest, SendMessageResult } from 'aws-sdk/clients/sqs';
-import { BaseSqsMessage } from '../sqs/ISqsMessage';
-import { SQSMessageAttributes } from 'aws-lambda';
-import { SqsLambdaServices } from '../sqs/SqsLambdaServices';
-import { MessagePublisher } from '../sqs/MessagePublisher';
+import { BaseSqsMessage, SqsLambdaServices, MessagePublisher, IQueue, Queue, ISqsPublisher } from '..';
 import { InteractionContext, createInteractionContext } from '@aesop-fables/containr-testing';
-import { IQueue, Queue } from '../sqs/IQueue';
+import { SQSMessageAttributes } from 'aws-lambda';
 
 const jobQueue: IQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
 

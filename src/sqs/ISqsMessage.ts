@@ -1,6 +1,6 @@
 import { SQSMessageAttributes } from 'aws-lambda';
 import { IQueue } from './IQueue';
-import { resolveEnvironmentSettings } from '../resolveEnvironmentSettings';
+import { resolveEnvironmentSettings } from '../ResolveEnvironmentSettings';
 
 export interface ISqsMessage {
   type: string;

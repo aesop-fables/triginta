@@ -1,5 +1,4 @@
-import { IQueue, Queue } from '../sqs/IQueue';
-import { BaseSqsMessage, TrigintaMessageHeaders } from '../sqs/ISqsMessage';
+import { IQueue, Queue, BaseSqsMessage, TrigintaMessageHeaders } from '..';
 
 class PassThruSqsMessage extends BaseSqsMessage {}
 
