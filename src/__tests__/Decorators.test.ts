@@ -11,8 +11,8 @@ import {
   httpPost,
   httpPut,
   httpDelete,
-} from '../Decorators';
-import { IConfiguredRoute } from '../http/IConfiguredRoute';
+  IConfiguredRoute,
+} from '..';
 
 describe('Decorators', () => {
   describe('routing', () => {

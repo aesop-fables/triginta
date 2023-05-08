@@ -9,8 +9,13 @@ export * from './sqs/SqsLambdaServices';
 export * from './sqs/ISqsMessageHandler';
 export * from './sqs/RecordMatchers';
 export * from './sqs/ISqsMessage';
+export * from './sqs/MessagePublisher';
+export * from './sqs/SqsSettings';
+export * from './sqs/IQueue';
+export * from './sqs/SqsPublisher';
 export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
+export * from './resolveEnvironmentSettings';
 
 export * as Localization from './localization';
 export * as Validation from './validation';
