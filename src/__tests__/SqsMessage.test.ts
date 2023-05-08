@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { IQueue, Queue, BaseSqsMessage, TrigintaMessageHeaders } from '..';
 
 class PassThruSqsMessage extends BaseSqsMessage {}
