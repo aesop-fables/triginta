@@ -38,6 +38,18 @@ export interface ISqsLambdaFactory {
   ): SQSHandler;
 }
 
+function embedSqsEvent(event: SQSEvent): IServiceModule {
+  return createServiceModule('@aesop-fables/triginta/sqs/event', (services) => {
+    services.register<SQSEvent>(SqsLambdaServices.CurrentEvent, event);
+  });
+}
+
+function embedSqsRecord(record: SQSRecord): IServiceModule {
+  return createServiceModule('@aesop-fables/triginta/sqs/record', (services) => {
+    services.register<SQSRecord>(SqsLambdaServices.CurrentRecord, record);
+  });
+}
+
 export class SqsLambdaFactory implements ISqsLambdaFactory {
   constructor(private readonly container: IServiceContainer) {}
 
@@ -45,21 +57,24 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler {
     const handler = async (event: SQSEvent) => {
-      const childContainer = this.container.createChildContainer('sqsLambda');
-      try {
-        const handler = childContainer.resolve(newable);
-        const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
-        for (let i = 0; i < event.Records.length; i++) {
-          const record = event.Records[i];
+      for (let i = 0; i < event.Records.length; i++) {
+        const record = event.Records[i];
+        const childContainer = this.container.createChildContainer('sqsLambda', [
+          embedSqsEvent(event),
+          embedSqsRecord(record),
+        ]);
+        try {
+          const handler = childContainer.resolve(newable);
+          const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
           const message = await deserializer.deserializeMessage<Message>(record);
           await handler.handle(message as Message, record, event);
-        }
-      } finally {
-        if (childContainer) {
-          try {
-            childContainer.dispose();
-          } catch {
-            // no-op
+        } finally {
+          if (childContainer) {
+            try {
+              childContainer.dispose();
+            } catch {
+              // no-op
+            }
           }
         }
       }
