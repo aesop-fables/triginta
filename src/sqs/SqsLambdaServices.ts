@@ -6,4 +6,6 @@ export const SqsLambdaServices = {
   MessagePublisher: 'MessagePublisher',
   SqsPublisher: 'SqsPublisher',
   SqsSettings: 'SqsSettings',
+  CurrentEvent: 'SqsCurrentEvent',
+  CurrentRecord: 'SqsCurrentRecord',
 };
