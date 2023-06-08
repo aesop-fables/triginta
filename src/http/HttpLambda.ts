@@ -150,17 +150,25 @@ export const useTrigintaHttp = createServiceModule('triginta/http', (services) =
   );
 });
 
+function validateContainer(container: IServiceContainer): void {
+  if (typeof container === 'undefined') {
+    throw new Error(`HTTP container not initialized`);
+  }
+}
+
 export function createBootstrappedHttpLambdaContext(container: IServiceContainer) {
   return {
     createHttpEventLambda<Output>(
       newable: Newable<IHttpEventHandler<Output>>,
     ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+      validateContainer(container);
       const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
       return factory.createEventHandler(newable);
     },
     createHttpLambda<Input, Output>(
       newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
     ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+      validateContainer(container);
       const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
       return factory.createHandler(newable);
     },

@@ -4,7 +4,7 @@ import { useHttpServices } from './http';
 import { BootstrappedHttpLambdaContext, createBootstrappedHttpLambdaContext, useTrigintaHttp } from './http/HttpLambda';
 import { useLocalization } from './localization';
 import { useHttpValidation } from './validation';
-import { useTrigintaSqs } from './sqs/SqsLambda';
+import { BootstrappedSqsLambdaContext, createBootstrappedSqsLambdaContext, useTrigintaSqs } from './sqs/SqsLambda';
 
 declare type Placeholder = object;
 
@@ -18,7 +18,7 @@ declare type ConfiguredServices<T> = {
   [Property in keyof AwsServices]: T;
 };
 
-interface BootstrappedTrigintaApp extends BootstrappedHttpLambdaContext {
+interface BootstrappedTrigintaApp extends BootstrappedHttpLambdaContext, BootstrappedSqsLambdaContext {
   containers: ConfiguredServices<IServiceContainer>;
 }
 
@@ -65,6 +65,7 @@ export function createTrigintaApp(options: TrigintaOptions): BootstrappedTrigint
 
   return {
     ...createBootstrappedHttpLambdaContext(containers.http),
+    ...createBootstrappedSqsLambdaContext(containers.sqs),
     containers,
   };
 }

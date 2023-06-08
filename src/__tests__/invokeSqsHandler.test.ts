@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { ISqsMessageHandler, SqsLambda, TestUtils, ISqsMessage } from '..';
+import { ISqsMessageHandler, TestUtils, ISqsMessage, createTrigintaApp } from '..';
 import { SQSEvent, SQSMessageAttributes, SQSRecord } from 'aws-lambda';
 
 const { invokeSqsHandler } = TestUtils;
@@ -32,22 +32,25 @@ describe('invokeSqsHandler', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
 
-      SqsLambda.initialize({
-        modules: [
-          createServiceModule('test', (services) => {
-            services.register<IEndpointRecorder>(RECORDER_KEY, {
-              recordEvent(event) {
-                events.push(event);
-              },
-              recordRequest(request) {
-                messages.push(request);
-              },
-            });
-          }),
-        ],
+      const {
+        containers: { sqs: container },
+      } = createTrigintaApp({
+        sqs: {
+          modules: [
+            createServiceModule('test', (services) => {
+              services.register<IEndpointRecorder>(RECORDER_KEY, {
+                recordEvent(event) {
+                  events.push(event);
+                },
+                recordRequest(request) {
+                  messages.push(request);
+                },
+              });
+            }),
+          ],
+        },
       });
 
-      const container = SqsLambda.getContainer();
       const message: ParsingMessage = {
         foo: 'bar',
         bar: 'foo',

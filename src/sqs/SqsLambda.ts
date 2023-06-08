@@ -26,7 +26,6 @@ import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
 import { SqsSettings } from './SqsSettings';
 
 export interface BootstrappedSqsLambdaContext {
-  container: IServiceContainer;
   createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler;
@@ -139,24 +138,17 @@ export interface SqsLambdaBootstrapExpression {
   modules?: IServiceModule[];
 }
 
-export class SqsLambda {
-  static initialize(expression: SqsLambdaBootstrapExpression): BootstrappedSqsLambdaContext {
-    const { matchers, modules = [] } = expression;
-    const container = createContainer([useTrigintaSqs({ matchers }), ...modules]);
-    _currentContainer = container;
+export function createBootstrappedSqsLambdaContext(container: IServiceContainer) {
+  return {
+    createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
+      newable: Newable<ISqsMessageHandler<Message, Output>>,
+    ): SQSHandler {
+      if (typeof container === 'undefined') {
+        throw new Error(`SQS container not initialized`);
+      }
 
-    return {
-      container,
-      createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
-        newable: Newable<ISqsMessageHandler<Message, Output>>,
-      ): SQSHandler {
-        const factory = container.get<ISqsLambdaFactory>(SqsLambdaServices.SqsLambdaFactory);
-        return factory.createHandler(newable);
-      },
-    };
-  }
-
-  static getContainer(): IServiceContainer {
-    return _currentContainer as IServiceContainer;
-  }
+      const factory = container.get<ISqsLambdaFactory>(SqsLambdaServices.SqsLambdaFactory);
+      return factory.createHandler(newable);
+    },
+  };
 }
