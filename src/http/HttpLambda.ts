@@ -1,14 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  createContainer,
-  createServiceModule,
-  inject,
-  IServiceContainer,
-  IServiceModule,
-  Newable,
-} from '@aesop-fables/containr';
+import { createServiceModule, inject, IServiceContainer, Newable } from '@aesop-fables/containr';
 import {
   APIGatewayEventRequestContextV2,
   APIGatewayProxyEventV2,
@@ -21,10 +14,7 @@ import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
-import { useHttpServices } from '.';
-import { useLocalization } from '../localization';
 import { IRequestContext } from './IRequestContext';
-import { useHttpValidation } from '../validation';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -160,35 +150,19 @@ export const useTrigintaHttp = createServiceModule('triginta/http', (services) =
   );
 });
 
-let _currentContainer: IServiceContainer | undefined;
-
-export class HttpLambda {
-  static initialize(modules: IServiceModule[] = []): BootstrappedHttpLambdaContext {
-    const container = createContainer([
-      useTrigintaHttp,
-      useHttpServices,
-      useLocalization,
-      useHttpValidation,
-      ...modules,
-    ]);
-    _currentContainer = container;
-    return {
-      createHttpEventLambda<Output>(
-        newable: Newable<IHttpEventHandler<Output>>,
-      ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
-        const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
-        return factory.createEventHandler(newable);
-      },
-      createHttpLambda<Input, Output>(
-        newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
-      ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
-        const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
-        return factory.createHandler(newable);
-      },
-    };
-  }
-
-  static getContainer(): IServiceContainer {
-    return _currentContainer as IServiceContainer;
-  }
+export function createBootstrappedHttpLambdaContext(container: IServiceContainer) {
+  return {
+    createHttpEventLambda<Output>(
+      newable: Newable<IHttpEventHandler<Output>>,
+    ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+      const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
+      return factory.createEventHandler(newable);
+    },
+    createHttpLambda<Input, Output>(
+      newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
+    ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
+      const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
+      return factory.createHandler(newable);
+    },
+  };
 }

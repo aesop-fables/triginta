@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { createServiceModuleWithOptions } from '@aesop-fables/containr';
-import { HttpLambdaServices, HttpLambda, IHttpResponseGenerator, IConfiguredRoute } from '..';
+import { HttpLambdaServices, IHttpResponseGenerator, IConfiguredRoute, createTrigintaApp } from '..';
 
 const testModule = createServiceModuleWithOptions<IConfiguredRoute>('testModule', (services, route) =>
   services.register<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route),
 );
 
 async function verifyDefaultResponse(route: IConfiguredRoute, expected: number) {
-  HttpLambda.initialize();
-  const container = HttpLambda.getContainer().createChildContainer('HttpResponseGeneratorTester', [testModule(route)]);
+  const { containers } = createTrigintaApp({ http: { modules: [] } });
+  const container = containers.http.createChildContainer('HttpResponseGeneratorTester', [testModule(route)]);
   const generator = container.get<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator);
 
   const generatorResponse = await generator.generateResponse(route.constructor());

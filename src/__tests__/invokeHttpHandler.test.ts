@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
-import { HttpLambda, httpPost, IHttpEndpoint, TestUtils, useMiddleware } from '..';
+import { createTrigintaApp, httpPost, IHttpEndpoint, TestUtils, useMiddleware } from '..';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import jsonBodyParser from '@middy/http-json-body-parser';
 
@@ -188,21 +188,25 @@ describe('invokeHttpHandler', () => {
       const events: APIGatewayProxyEventV2[] = [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
+      const { containers } = createTrigintaApp({
+        http: {
+          modules: [
+            createServiceModule('test', (services) => {
+              services.register<IEndpointRecorder>(RECORDER_KEY, {
+                recordEvent(event) {
+                  events.push(event);
+                },
+                recordRequest(request) {
+                  messages.push(request);
+                },
+              });
+            }),
+          ],
+        },
+      });
 
-      HttpLambda.initialize([
-        createServiceModule('test', (services) => {
-          services.register<IEndpointRecorder>(RECORDER_KEY, {
-            recordEvent(event) {
-              events.push(event);
-            },
-            recordRequest(request) {
-              messages.push(request);
-            },
-          });
-        }),
-      ]);
+      const { http: container } = containers;
 
-      const container = HttpLambda.getContainer();
       const body: ParsingRequest = {
         foo: 'bar',
         bar: 'foo',

@@ -3,12 +3,12 @@ import { createContainer, createServiceModule, inject } from '@aesop-fables/cont
 import { httpPost, useMiddleware } from '../../Decorators';
 import { IHttpEndpoint } from '../../http/IHttpEndpoint';
 import jsonBodyParser from '@middy/http-json-body-parser';
-import { HttpLambda } from '../../http/HttpLambda';
 import { invokeHttpHandler } from '../../http/invokeHttpHandler';
 import { APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { Validation } from '../..';
 import { IValidationRule } from '../../validation';
 import { LocalizedString } from '../../localization';
+import { createTrigintaApp } from '../../Bootstrapping';
 
 const { validate } = Validation;
 
@@ -69,17 +69,21 @@ describe('Validator', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
 
-      HttpLambda.initialize([
-        createServiceModule('test', (services) => {
-          services.register<IEndpointRecorder>(RECORDER_KEY, {
-            recordRequest(request) {
-              messages.push(request);
-            },
-          });
-        }),
-      ]);
+      const { containers } = createTrigintaApp({
+        http: {
+          modules: [
+            createServiceModule('test', (services) => {
+              services.register<IEndpointRecorder>(RECORDER_KEY, {
+                recordRequest(request) {
+                  messages.push(request);
+                },
+              });
+            }),
+          ],
+        },
+      });
 
-      const container = HttpLambda.getContainer();
+      const { http: container } = containers;
       const body: TestModel = {
         firstName: '',
       };
@@ -107,18 +111,21 @@ describe('Validator', () => {
     test('registers message for custom rule', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
+      const { containers } = createTrigintaApp({
+        http: {
+          modules: [
+            createServiceModule('test', (services) => {
+              services.register<IEndpointRecorder>(RECORDER_KEY, {
+                recordRequest(request) {
+                  messages.push(request);
+                },
+              });
+            }),
+          ],
+        },
+      });
 
-      HttpLambda.initialize([
-        createServiceModule('test', (services) => {
-          services.register<IEndpointRecorder>(RECORDER_KEY, {
-            recordRequest(request) {
-              messages.push(request);
-            },
-          });
-        }),
-      ]);
-
-      const container = HttpLambda.getContainer();
+      const { http: container } = containers;
       const body: TestModel = {
         firstName: 'Fugi',
       };
@@ -147,17 +154,21 @@ describe('Validator', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages: any[] = [];
 
-      HttpLambda.initialize([
-        createServiceModule('test', (services) => {
-          services.register<IEndpointRecorder>(RECORDER_KEY, {
-            recordRequest(request) {
-              messages.push(request);
-            },
-          });
-        }),
-      ]);
+      const { containers } = createTrigintaApp({
+        http: {
+          modules: [
+            createServiceModule('test', (services) => {
+              services.register<IEndpointRecorder>(RECORDER_KEY, {
+                recordRequest(request) {
+                  messages.push(request);
+                },
+              });
+            }),
+          ],
+        },
+      });
 
-      const container = HttpLambda.getContainer();
+      const { http: container } = containers;
       const body: TestModel = {
         firstName: 'I AM VALID OKAY',
       };

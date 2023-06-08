@@ -5,11 +5,11 @@ import {
   getMiddleware,
   IConfiguredRoute,
   IHttpEndpoint,
-  HttpLambda,
   httpPut,
   getRoute,
   TestUtils,
   useMiddleware,
+  createTrigintaApp,
 } from '..';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHanlder from '@middy/http-error-handler';
@@ -78,8 +78,13 @@ describe('createHttpLambda', () => {
       active: true,
     };
 
-    HttpLambda.initialize([setupCreateHttpLambdaTest]);
-    const container = HttpLambda.getContainer();
+    const {
+      containers: { http: container },
+    } = createTrigintaApp({
+      http: {
+        modules: [setupCreateHttpLambdaTest],
+      },
+    });
     // Force the recorder to resolve right away - otherwise, it'll get lost in the child container
     const recorder = container.get<Recorder>(TestServices.Recorder);
 

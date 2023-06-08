@@ -104,11 +104,11 @@ class NoOpMatcher implements ISqsRecordMatcher {
   }
 }
 
-export interface TrigintaSqsOptions {
+export interface TrigintaLegacySqsOptions {
   matchers?: ISqsRecordMatcher[];
 }
 
-export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaSqsOptions>(
+export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaLegacySqsOptions>(
   'triginta/sqs',
   (services, options) => {
     services.register<ISqsLambdaFactory>(
