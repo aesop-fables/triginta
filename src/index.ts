@@ -1,3 +1,4 @@
+export * from './Bootstrapping';
 export * from './IHandler';
 export * from './http/IHttpEndpoint';
 export * from './Decorators';
