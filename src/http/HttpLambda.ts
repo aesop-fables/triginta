@@ -25,10 +25,10 @@ import { IConfiguredRoute } from './IConfiguredRoute';
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
 export interface BootstrappedHttpLambdaContext {
-  createHttpEventLambda<Output>(
+  createHttpEventHandler<Output>(
     newable: Newable<IHttpEventHandler<Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
-  createHttpLambda<Input, Output>(
+  createHttpHandler<Input, Output>(
     newable: Newable<IHttpEndpoint<Input, Output>>,
   ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
 }
@@ -158,16 +158,16 @@ function validateContainer(container: IServiceContainer): void {
   }
 }
 
-export function createBootstrappedHttpLambdaContext(container: IServiceContainer) {
+export function createBootstrappedHttpLambdaContext(container: IServiceContainer): BootstrappedHttpLambdaContext {
   return {
-    createHttpEventLambda<Output>(
+    createHttpEventHandler<Output>(
       newable: Newable<IHttpEventHandler<Output>>,
     ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
       validateContainer(container);
       const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
       return factory.createEventHandler(newable);
     },
-    createHttpLambda<Input, Output>(
+    createHttpHandler<Input, Output>(
       newable: Newable<IHttpEndpoint<Input, Output> | IHttpEventHandler<Output>>,
     ): Handler<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2> {
       validateContainer(container);
