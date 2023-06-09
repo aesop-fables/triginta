@@ -1,11 +1,15 @@
+import { createServiceNamespacer } from '../Utils';
+
+const namedService = createServiceNamespacer('sqs');
+
 export const SqsLambdaServices = {
-  SqsLambdaFactory: 'SqsLambdaFactory',
-  DefaultRecordMatcher: 'DefaultRecordMatcher',
-  MessageDeserializer: 'MessageDeserializer',
-  RecordMatchers: 'RecordMatchers',
-  MessagePublisher: 'MessagePublisher',
-  SqsPublisher: 'SqsPublisher',
-  SqsSettings: 'SqsSettings',
-  CurrentEvent: 'SqsCurrentEvent',
-  CurrentRecord: 'SqsCurrentRecord',
+  SqsLambdaFactory: namedService('SqsLambdaFactory'),
+  DefaultRecordMatcher: namedService('DefaultRecordMatcher'),
+  MessageDeserializer: namedService('MessageDeserializer'),
+  RecordMatchers: namedService('RecordMatchers'),
+  MessagePublisher: namedService('MessagePublisher'),
+  SqsPublisher: namedService('SqsPublisher'),
+  SqsSettings: namedService('SqsSettings'),
+  CurrentEvent: namedService('SqsCurrentEvent'),
+  CurrentRecord: namedService('SqsCurrentRecord'),
 };

@@ -1,7 +1,7 @@
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
 import { ISqsMessage, TrigintaMessageHeaders } from './ISqsMessage';
 import { SqsLambdaServices } from './SqsLambdaServices';
-import { inject } from '@aesop-fables/containr';
+import { inject, injectArray } from '@aesop-fables/containr';
 
 export interface ISqsRecordMatcher {
   matches(record: SQSRecord): boolean;
@@ -49,7 +49,7 @@ export interface ISqsMessageDeserializer {
 
 export class SqsMessageDeserializer implements ISqsMessageDeserializer {
   constructor(
-    @inject(SqsLambdaServices.RecordMatchers) private readonly matchers: ISqsRecordMatcher[],
+    @injectArray(SqsLambdaServices.RecordMatchers) private readonly matchers: ISqsRecordMatcher[],
     @inject(SqsLambdaServices.DefaultRecordMatcher) private readonly defaultMatcher: ISqsRecordMatcher,
   ) {}
 

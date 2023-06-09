@@ -6,13 +6,13 @@ import {
   httpGet,
   IHttpEndpoint,
   IHttpEventHandler,
-  HttpLambda,
   HttpLambdaFactory,
   IHttpLambdaFactory,
   IHttpResponseGenerator,
   HttpLambdaServices,
   IConfiguredRoute,
   TestUtils,
+  createTrigintaApp,
 } from '..';
 
 interface InitializeRequest {}
@@ -36,10 +36,10 @@ class InitializeWithoutInputEndpoint implements IHttpEventHandler<string> {
 describe('HttpLambda', () => {
   describe('initialize', () => {
     test('no service modules', async () => {
-      HttpLambda.initialize();
+      const { containers } = createTrigintaApp({ http: { modules: [] } });
       const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
-        container: HttpLambda.getContainer(),
+        container: containers.http,
         rawPath: '/http-lambda/initialize',
       });
 
@@ -47,10 +47,10 @@ describe('HttpLambda', () => {
     });
 
     test('no input model', async () => {
-      HttpLambda.initialize();
+      const { containers } = createTrigintaApp({ http: { modules: [] } });
       const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeWithoutInputEndpoint) as IConfiguredRoute,
-        container: HttpLambda.getContainer(),
+        container: containers.http,
         headers: { 'x-message': 'sans-input!' },
         rawPath: '/http-lambda/initialize/without-input',
       });
@@ -87,10 +87,15 @@ describe('HttpLambda', () => {
         });
       });
 
-      HttpLambda.initialize([useCustomFactory]);
+      const { containers } = createTrigintaApp({
+        http: {
+          modules: [useCustomFactory],
+        },
+      });
+
       const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
-        container: HttpLambda.getContainer(),
+        container: containers.http,
         rawPath: '/http-lambda/initialize',
       });
 
@@ -123,10 +128,14 @@ describe('HttpLambda', () => {
         });
       });
 
-      HttpLambda.initialize([useCustomFactory]);
+      const { containers } = createTrigintaApp({
+        http: {
+          modules: [useCustomFactory],
+        },
+      });
       const response = await TestUtils.invokeHttpHandler({
         configuredRoute: getRoute(InitializeEndpoint) as IConfiguredRoute,
-        container: HttpLambda.getContainer(),
+        container: containers.http,
         rawPath: '/http-lambda/initialize',
       });
 

@@ -4,13 +4,13 @@ import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
 import {
   TestUtils,
   ISqsMessageHandler,
-  SqsLambda,
   BaseSqsMessage,
   ISqsMessage,
   TrigintaMessageHeaders,
   createMatcher,
   IQueue,
   Queue,
+  createTrigintaApp,
 } from '..';
 
 interface TestMessage extends ISqsMessage {
@@ -68,15 +68,15 @@ class SpinUpTenantMessage extends BaseSqsMessage {
 
 const useRecorder = createServiceModule('useRecorder', (services) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  services.register<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
+  services.singleton<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
 );
 
 describe('SqsLambda', () => {
   describe('initialize', () => {
     test('bootstraps the lambda', async () => {
-      const { container } = SqsLambda.initialize({ modules: [useRecorder] });
+      const { containers } = createTrigintaApp({ sqs: { modules: [useRecorder] } });
       await TestUtils.invokeSqsHandler({
-        container,
+        container: containers.sqs,
         handler: TestHandler,
         Records: [
           {
@@ -91,7 +91,7 @@ describe('SqsLambda', () => {
         ],
       });
 
-      const recorder = container.get<MessageRecorder<TestMessage>>(recorderKey);
+      const recorder = containers.sqs.get<MessageRecorder<TestMessage>>(recorderKey);
       expect(recorder.messages.length).toBe(1);
     });
   });
@@ -109,9 +109,13 @@ describe('SqsLambda', () => {
         },
         type: SpinUpMessageType,
       });
-      const { container } = SqsLambda.initialize({
-        matchers: [matcher],
-        modules: [useRecorder],
+      const {
+        containers: { sqs: container },
+      } = createTrigintaApp({
+        sqs: {
+          matchers: [matcher],
+          modules: [useRecorder],
+        },
       });
       await TestUtils.invokeSqsHandler({
         container,

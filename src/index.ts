@@ -1,3 +1,4 @@
+export * from './Bootstrapping';
 export * from './IHandler';
 export * from './http/IHttpEndpoint';
 export * from './Decorators';
@@ -17,11 +18,16 @@ export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
 export * from './resolveEnvironmentSettings';
 
+export * from './s3/IS3RecordHandler';
+export * from './s3/S3Lambda';
+export * from './s3/S3LambdaServices';
+
 export * as Localization from './localization';
 export * as Validation from './validation';
 
 import * as httpUtils from './http/invokeHttpHandler';
 import * as sqsUtils from './sqs/invokeSqsHandler';
+import * as s3Utils from './s3/invokeS3Handler';
 
 /**
  * Provides helper functions for invoking lambdas in unit/integration tests.
@@ -29,4 +35,5 @@ import * as sqsUtils from './sqs/invokeSqsHandler';
 export const TestUtils = {
   ...httpUtils,
   ...sqsUtils,
+  ...s3Utils,
 };

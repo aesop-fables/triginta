@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import middy from '@middy/core';
-import { IRequestContext } from '../http/IRequestContext';
 import { IValidatorFactory } from './IValidatorFactory';
 import { IConfiguredValidationRule } from './IConfiguredValidationRule';
 import { ValidationServices } from './ValidationServices';
 import { IValidationFailureHandler } from './IValidationFailureHandler';
+import { IRequestContext } from '../http/IRequestContext';
 
 export function validate(
   rules: IConfiguredValidationRule[],
