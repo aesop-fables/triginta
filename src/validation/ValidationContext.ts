@@ -32,7 +32,7 @@ export class ValidationContext<Model extends DefaultModel = DefaultModel> {
 
   isEmpty() {
     const value = this.value();
-    if (typeof value === 'undefined' || !value) {
+    if (typeof value === 'undefined' || value === null) {
       return true;
     }
 
@@ -40,6 +40,6 @@ export class ValidationContext<Model extends DefaultModel = DefaultModel> {
       return value.length === 0 || value.trim().length === 0;
     }
 
-    return value === 0;
+    return false;
   }
 }

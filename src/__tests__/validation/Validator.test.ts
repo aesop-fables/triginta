@@ -21,6 +21,7 @@ interface IEndpointRecorder {
 
 interface TestModel {
   firstName: string;
+  count: number;
 }
 
 const Fugitive: LocalizedString = { key: 'Fugitive', defaultValue: 'Sounds too much like a fugitive, to me' };
@@ -37,6 +38,9 @@ const rules = Validation.parseRules<TestModel>({
   firstName: {
     required: true,
     custom: [new TestRule()],
+  },
+  count: {
+    required: true,
   },
 });
 
@@ -73,7 +77,7 @@ describe('Validator', () => {
         http: {
           modules: [
             createServiceModule('test', (services) => {
-              services.register<IEndpointRecorder>(RECORDER_KEY, {
+              services.singleton<IEndpointRecorder>(RECORDER_KEY, {
                 recordRequest(request) {
                   messages.push(request);
                 },
@@ -86,6 +90,7 @@ describe('Validator', () => {
       const { http: container } = containers;
       const body: TestModel = {
         firstName: '',
+        count: 0,
       };
 
       const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
@@ -128,6 +133,7 @@ describe('Validator', () => {
       const { http: container } = containers;
       const body: TestModel = {
         firstName: 'Fugi',
+        count: 0,
       };
 
       const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
@@ -171,6 +177,7 @@ describe('Validator', () => {
       const { http: container } = containers;
       const body: TestModel = {
         firstName: 'I AM VALID OKAY',
+        count: 0,
       };
 
       const response = (await invokeHttpHandler<APIGatewayProxyResultV2>({
