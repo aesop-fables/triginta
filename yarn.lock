@@ -2,17 +2,17 @@
 # yarn lockfile v1
 
 
-"@aesop-fables/containr-testing@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@aesop-fables/containr-testing/-/containr-testing-0.2.3.tgz#dd697b1a45462e0a1701e4d9cfbab16aad2c4c48"
-  integrity sha512-yE6ixEZKUK9rZVMMP3NCavmxt5nlhAaoZqCQV7PRGMwHfMzZbfCTugZTtw2jesjUG7pL5t3yCgtgRdFMe5OQ7Q==
+"@aesop-fables/containr-testing@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@aesop-fables/containr-testing/-/containr-testing-0.3.0.tgz#efe2f8d40c9af1d29eec31751ff458af222025bc"
+  integrity sha512-hdqAZx24VovKBLxxJMgpXA/n/Uv2nLFbeCsqgqids/MR8uKB0YMGLJ0JDFoKSG1KznlVFSd4xikHe5N0Q0ViuQ==
   dependencies:
     reflect-metadata "^0.1.13"
 
-"@aesop-fables/containr@^0.2.5":
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.2.5.tgz#db2dd38194041adfece9e7dfd9537eb914004529"
-  integrity sha512-GrIHpMnHo55yy1rZCviNdLzllqywohxXOoCFEMQcKLRMgE5d2ND8Sod337YEULJDQf210qzaLlKeY9ba621phg==
+"@aesop-fables/containr@^0.3.4":
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.3.4.tgz#fd47ac71e4ac2a7af9b8926bdad394ef39937e32"
+  integrity sha512-HHDi05MmA76nhc0CRJRYihFrX3j/J8W7mQgjcIfQ38Fk+4Zwri31oQZPhd5OUF2Q+9BH4kieu874eu5VOHuPuw==
   dependencies:
     jest-mock-extended "^3.0.1"
     reflect-metadata "^0.1.13"

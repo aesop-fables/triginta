@@ -24,8 +24,8 @@
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
-    "@aesop-fables/containr": "^0.2.5",
-    "@aesop-fables/containr-testing": "^0.2.3",
+    "@aesop-fables/containr": "^0.3.4",
+    "@aesop-fables/containr-testing": "^0.3.0",
     "@middy/core": "^4.2.7",
     "@middy/http-error-handler": "^4.4.3",
     "@middy/http-json-body-parser": "^4.2.3",

@@ -68,7 +68,7 @@ class SpinUpTenantMessage extends BaseSqsMessage {
 
 const useRecorder = createServiceModule('useRecorder', (services) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  services.register<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
+  services.singleton<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
 );
 
 describe('SqsLambda', () => {

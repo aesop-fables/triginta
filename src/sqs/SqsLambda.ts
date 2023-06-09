@@ -5,9 +5,11 @@ import {
   createContainer,
   createServiceModule,
   createServiceModuleWithOptions,
+  injectContainer,
   IServiceContainer,
   IServiceModule,
   Newable,
+  Scopes,
 } from '@aesop-fables/containr';
 import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
 import middy from '@middy/core';
@@ -26,7 +28,7 @@ import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
 import { SqsSettings } from './SqsSettings';
 
 export interface BootstrappedSqsLambdaContext {
-  createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
+  createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler;
 }
@@ -39,18 +41,18 @@ export interface ISqsLambdaFactory {
 
 function embedSqsEvent(event: SQSEvent): IServiceModule {
   return createServiceModule('@aesop-fables/triginta/sqs/event', (services) => {
-    services.register<SQSEvent>(SqsLambdaServices.CurrentEvent, event);
+    services.singleton<SQSEvent>(SqsLambdaServices.CurrentEvent, event);
   });
 }
 
 function embedSqsRecord(record: SQSRecord): IServiceModule {
   return createServiceModule('@aesop-fables/triginta/sqs/record', (services) => {
-    services.register<SQSRecord>(SqsLambdaServices.CurrentRecord, record);
+    services.singleton<SQSRecord>(SqsLambdaServices.CurrentRecord, record);
   });
 }
 
 export class SqsLambdaFactory implements ISqsLambdaFactory {
-  constructor(private readonly container: IServiceContainer) {}
+  constructor(@injectContainer() private readonly container: IServiceContainer) {}
 
   createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
@@ -92,17 +94,6 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
   }
 }
 
-// Here until we fix containr's array stuff
-// I think we might want to just use a different inject call for arrays
-class NoOpMatcher implements ISqsRecordMatcher {
-  matches(): boolean {
-    return false;
-  }
-  deserializeMessage<Message extends ISqsMessage>(): Promise<Message> {
-    throw new Error('Method not implemented.');
-  }
-}
-
 export interface TrigintaLegacySqsOptions {
   matchers?: ISqsRecordMatcher[];
 }
@@ -110,37 +101,36 @@ export interface TrigintaLegacySqsOptions {
 export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaLegacySqsOptions>(
   'triginta/sqs',
   (services, options) => {
-    services.register<ISqsLambdaFactory>(
-      SqsLambdaServices.SqsLambdaFactory,
-      (container) => new SqsLambdaFactory(container),
-    );
+    services.autoResolve<ISqsLambdaFactory>(SqsLambdaServices.SqsLambdaFactory, SqsLambdaFactory, Scopes.Transient);
 
     const { matchers = [] } = options;
-    if (matchers.length === 0) {
-      matchers.push(new NoOpMatcher());
-    }
-
     matchers.forEach((matcher) => {
-      services.addDependency<ISqsRecordMatcher>(SqsLambdaServices.RecordMatchers, matcher);
+      services.array<ISqsRecordMatcher>(SqsLambdaServices.RecordMatchers, matcher);
     });
-    services.register<SqsSettings>(SqsLambdaServices.SqsSettings, {} as SqsSettings);
-    services.use<ISqsRecordMatcher>(SqsLambdaServices.DefaultRecordMatcher, DefaultSqsRecordMatcher);
-    services.use<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer, SqsMessageDeserializer);
-    services.use<ISqsPublisher>(SqsLambdaServices.SqsPublisher, SqsPublisher);
-    services.use<IMessagePublisher>(SqsLambdaServices.MessagePublisher, MessagePublisher);
+    services.singleton<SqsSettings>(SqsLambdaServices.SqsSettings, {} as SqsSettings);
+    services.autoResolve<ISqsRecordMatcher>(
+      SqsLambdaServices.DefaultRecordMatcher,
+      DefaultSqsRecordMatcher,
+      Scopes.Transient,
+    );
+    services.autoResolve<ISqsMessageDeserializer>(
+      SqsLambdaServices.MessageDeserializer,
+      SqsMessageDeserializer,
+      Scopes.Transient,
+    );
+    services.autoResolve<ISqsPublisher>(SqsLambdaServices.SqsPublisher, SqsPublisher, Scopes.Transient);
+    services.autoResolve<IMessagePublisher>(SqsLambdaServices.MessagePublisher, MessagePublisher, Scopes.Transient);
   },
 );
-
-let _currentContainer: IServiceContainer | undefined;
 
 export interface SqsLambdaBootstrapExpression {
   matchers?: ISqsRecordMatcher[];
   modules?: IServiceModule[];
 }
 
-export function createBootstrappedSqsLambdaContext(container: IServiceContainer) {
+export function createBootstrappedSqsLambdaContext(container: IServiceContainer): BootstrappedSqsLambdaContext {
   return {
-    createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
+    createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
       newable: Newable<ISqsMessageHandler<Message, Output>>,
     ): SQSHandler {
       if (typeof container === 'undefined') {
