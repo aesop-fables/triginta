@@ -5,6 +5,7 @@ import { BootstrappedHttpLambdaContext, createBootstrappedHttpLambdaContext, use
 import { useLocalization } from './localization';
 import { useHttpValidation } from './validation';
 import { BootstrappedSqsLambdaContext, createBootstrappedSqsLambdaContext, useTrigintaSqs } from './sqs/SqsLambda';
+import { BootstrappedS3LambdaContext, createBootstrappedS3LambdaContext, useTrigintaS3 } from './s3/S3Lambda';
 
 declare type Placeholder = object;
 
@@ -18,7 +19,10 @@ declare type ConfiguredServices<T> = {
   [Property in keyof AwsServices]: T;
 };
 
-interface BootstrappedTrigintaApp extends BootstrappedHttpLambdaContext, BootstrappedSqsLambdaContext {
+interface BootstrappedTrigintaApp
+  extends BootstrappedHttpLambdaContext,
+    BootstrappedSqsLambdaContext,
+    BootstrappedS3LambdaContext {
   containers: ConfiguredServices<IServiceContainer>;
 }
 
@@ -50,7 +54,7 @@ export function createTrigintaApp(options: TrigintaOptions): BootstrappedTrigint
         container = createContainer([useTrigintaHttp, useHttpServices, useLocalization, useHttpValidation, ...modules]);
         break;
       case 's3':
-        throw new Error('Not implemented');
+        container = createContainer([useTrigintaS3, ...modules]);
         break;
       case 'sqs':
         const { matchers = [] } = serviceOptions as TrigintaSqsOptions;
@@ -66,6 +70,7 @@ export function createTrigintaApp(options: TrigintaOptions): BootstrappedTrigint
   return {
     ...createBootstrappedHttpLambdaContext(containers.http),
     ...createBootstrappedSqsLambdaContext(containers.sqs),
+    ...createBootstrappedS3LambdaContext(containers.s3),
     containers,
   };
 }
