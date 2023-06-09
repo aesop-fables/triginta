@@ -77,7 +77,7 @@ describe('Validator', () => {
         http: {
           modules: [
             createServiceModule('test', (services) => {
-              services.register<IEndpointRecorder>(RECORDER_KEY, {
+              services.singleton<IEndpointRecorder>(RECORDER_KEY, {
                 recordRequest(request) {
                   messages.push(request);
                 },
