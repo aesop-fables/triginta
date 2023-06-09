@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createServiceModule, injectContainer, IServiceContainer, IServiceModule, Newable, Scopes } from '@aesop-fables/containr';
+import {
+  createServiceModule,
+  injectContainer,
+  IServiceContainer,
+  IServiceModule,
+  Newable,
+  Scopes,
+} from '@aesop-fables/containr';
 import middy from '@middy/core';
 import { IS3RecordHandler } from './IS3RecordHandler';
 import { getMiddleware } from '../Decorators';
