@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { createServiceModule, Newable } from '@aesop-fables/containr';
+import { createServiceModule, IServiceContainer, Newable, Scopes } from '@aesop-fables/containr';
 import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
 import {
   getRoute,
@@ -13,7 +13,10 @@ import {
   IConfiguredRoute,
   TestUtils,
   createTrigintaApp,
+  useMiddleware,
 } from '..';
+import middy from '@middy/core';
+import { IRequestContext } from '../http/IRequestContext';
 
 interface InitializeRequest {}
 
@@ -44,6 +47,50 @@ describe('HttpLambda', () => {
       });
 
       expect(response.body).toBe('"Hello!"');
+    });
+
+    test('verify injected contextual services', async () => {
+      let injectedContainer: IServiceContainer | undefined;
+      function recordingMiddleware(): () => middy.MiddlewareObj<
+        APIGatewayProxyEventV2,
+        APIGatewayProxyStructuredResultV2
+      > {
+        return () => {
+          return {
+            async before(request) {
+              injectedContainer = (request.context as unknown as IRequestContext).container;
+            },
+          };
+        };
+      }
+
+      @httpGet('/http-lambda/injection')
+      @useMiddleware(recordingMiddleware())
+      class InjectionEndpoint implements IHttpEndpoint<InitializeRequest, string> {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        async handle(message: InitializeRequest, event: APIGatewayProxyEventV2): Promise<string> {
+          return 'Hello!';
+        }
+      }
+
+      const { containers } = createTrigintaApp({ http: { modules: [] } });
+      await TestUtils.invokeHttpHandler({
+        configuredRoute: getRoute(InjectionEndpoint) as IConfiguredRoute,
+        container: containers.http,
+        rawPath: '/http-lambda/injection',
+      });
+
+      expect(injectedContainer).toBeDefined();
+
+      expect(injectedContainer?.get<IConfiguredRoute>(HttpLambdaServices.CurrentRoute)).toEqual(
+        getRoute(InjectionEndpoint),
+      );
+
+      const event = injectedContainer?.get<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent);
+      expect(event?.rawPath).toEqual('/http-lambda/injection');
+
+      const context = injectedContainer?.get<IRequestContext>(HttpLambdaServices.RequestContext);
+      expect(context?.container).toEqual(injectedContainer);
     });
 
     test('no input model', async () => {
@@ -123,9 +170,13 @@ describe('HttpLambda', () => {
       }
 
       const useCustomFactory = createServiceModule('customHttpReponseGenerator', (services) => {
-        services.register<IHttpResponseGenerator>(HttpLambdaServices.HttpResponseGenerator, () => {
-          return new CustomHttpResponseGenerator();
-        });
+        services.factory<IHttpResponseGenerator>(
+          HttpLambdaServices.HttpResponseGenerator,
+          () => {
+            return new CustomHttpResponseGenerator();
+          },
+          Scopes.Transient,
+        );
       });
 
       const { containers } = createTrigintaApp({

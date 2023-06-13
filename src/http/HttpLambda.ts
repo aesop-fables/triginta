@@ -21,6 +21,7 @@ import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
+import { IRequestContext } from './IRequestContext';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -126,6 +127,16 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
         const injectContextualServices = createServiceModule('injectContextualServices', (services) => {
           services.singleton<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
           services.singleton<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
+
+          services.factory<IRequestContext>(
+            HttpLambdaServices.RequestContext,
+            (current) => {
+              return {
+                container: current,
+              };
+            },
+            Scopes.Transient,
+          );
         });
 
         const childContainer = container.createChildContainer('httpLambda', [injectContextualServices]);
