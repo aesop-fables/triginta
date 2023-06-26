@@ -36,7 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "5.59.11",
     "aws-sdk": "^2.1386.0",
-    "esbuild": "^0.17.8",
+    "esbuild": "^0.18.9",
     "eslint": "8.42.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-jest": "27.2.1",
