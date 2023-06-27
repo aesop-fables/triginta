@@ -26,6 +26,7 @@ import {
 import { ISqsPublisher, SqsPublisher } from './SqsPublisher';
 import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
 import { SqsSettings } from './SqsSettings';
+import { CurrentRecordLoggingLevel, LoggingRegistry } from '../logging';
 
 export interface BootstrappedSqsLambdaContext {
   createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
@@ -120,6 +121,8 @@ export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaLegacySqsOp
     );
     services.autoResolve<ISqsPublisher>(SqsLambdaServices.SqsPublisher, SqsPublisher, Scopes.Transient);
     services.autoResolve<IMessagePublisher>(SqsLambdaServices.MessagePublisher, MessagePublisher, Scopes.Transient);
+
+    services.include(new LoggingRegistry(CurrentRecordLoggingLevel));
   },
 );
 

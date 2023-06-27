@@ -17,6 +17,7 @@ export * from './sqs/SqsPublisher';
 export * from './http/IConfiguredRoute';
 export * from './TrigintaConfig';
 export * from './resolveEnvironmentSettings';
+export * from './TrigintaHeaders';
 
 export * from './s3/IS3RecordHandler';
 export * from './s3/S3Lambda';
@@ -24,6 +25,7 @@ export * from './s3/S3LambdaServices';
 
 export * as Localization from './localization';
 export * as Validation from './validation';
+export * as Logging from './logging';
 
 import * as httpUtils from './http/invokeHttpHandler';
 import * as sqsUtils from './sqs/invokeSqsHandler';
