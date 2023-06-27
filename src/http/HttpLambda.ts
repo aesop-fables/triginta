@@ -22,6 +22,8 @@ import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
 import { IRequestContext } from './IRequestContext';
+import { LoggingRegistry } from '../logging/LoggingRegistry';
+import { CurrentRequestLoggingLevel } from '../logging/Levels';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -161,6 +163,7 @@ export const useTrigintaHttp = createServiceModule('triginta/http', (services) =
     Scopes.Transient,
   );
   services.autoResolve<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory, HttpLambdaFactory, Scopes.Transient);
+  services.include(new LoggingRegistry(CurrentRequestLoggingLevel));
 });
 
 function validateContainer(container: IServiceContainer): void {
