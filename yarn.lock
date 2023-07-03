@@ -736,16 +736,21 @@
     "@middy/util" "4.5.1"
 
 "@middy/http-json-body-parser@^4.5.1":
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/@middy/http-json-body-parser/-/http-json-body-parser-4.5.1.tgz#f4cc3ffa1c2547b3373ea71111b10e72e7b898b8"
-  integrity sha512-cbCQe8OajAVBuVhEqicZYezXYPGKxVepUlpfDezgBnKHPS/vm64FhMvNyg7SOtB0mvAj5wcCz4n5eKjxjMyTXw==
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/@middy/http-json-body-parser/-/http-json-body-parser-4.5.3.tgz#210f60ef4723e6d115fd1cd95a1da06cfd7f00c2"
+  integrity sha512-iioUqitxC4PDL7kBiepn66v7SlwY4eD+NqK8S1g4SynYcH57x9KhUTtc+F1bO9BFPsKzM9MZcMSHo7F2GAXdnw==
   dependencies:
-    "@middy/util" "4.5.1"
+    "@middy/util" "4.5.3"
 
-"@middy/util@4.5.1", "@middy/util@^4.5.1":
+"@middy/util@4.5.1":
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.5.1.tgz#160df5333aa7315f5778e7c1e6f08df8d6e6d841"
   integrity sha512-iOlh1umWeXOxySuQgmxr0LDHHLO8pMf7jcc2oFGMuUJJ67t6exaDE9dJsS2svhnutzuqTa0meFZreuw7LR4BYA==
+
+"@middy/util@4.5.3", "@middy/util@^4.5.1":
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/@middy/util/-/util-4.5.3.tgz#2c95bfa22290b06fba92282ef4865ab12bd94afb"
+  integrity sha512-IyMcXcrzztWzppc9rCYle3e5FR5hICiia0JfPPxM0CtS8eiqr/Wkf18IHjXh2XscmlrmBECfxp7JwfAzZtGxiQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
