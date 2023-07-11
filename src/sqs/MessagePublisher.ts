@@ -1,25 +1,36 @@
 import { inject } from '@aesop-fables/containr';
 import { MessageBodyAttributeMap, SendMessageRequest, SendMessageResult } from 'aws-sdk/clients/sqs';
-import { SqsPublisher } from './SqsPublisher';
+import { ISqsPublisher } from './SqsPublisher';
 import { SQSMessageAttributes } from 'aws-lambda';
 import { SqsLambdaServices } from './SqsLambdaServices';
 import { ISqsMessage } from './ISqsMessage';
 import { LoggingLevel, LoggingServices } from '../logging';
 import { TrigintaHeaders } from '../TrigintaHeaders';
 
+declare type ConfigureSqsDelegate = (params: SendMessageRequest) => Promise<void>;
+
 export interface IMessagePublisher {
-  publish(event: ISqsMessage): Promise<SendMessageResult>;
+  publish(
+    event: ISqsMessage,
+    defaultAttributes?: SQSMessageAttributes,
+    configure?: ConfigureSqsDelegate,
+  ): Promise<SendMessageResult>;
 }
 
 export class MessagePublisher implements IMessagePublisher {
   // eslint-disable-next-line prettier/prettier
   constructor(
-    @inject(SqsLambdaServices.SqsPublisher) private readonly sqsPublisher: SqsPublisher,
+    @inject(SqsLambdaServices.SqsPublisher) private readonly sqsPublisher: ISqsPublisher,
     @inject(LoggingServices.Levels) private readonly levels: LoggingLevel,
   ) {}
 
-  async publish(sqsMessage: ISqsMessage): Promise<SendMessageResult> {
+  async publish(
+    sqsMessage: ISqsMessage,
+    defaultAttributes?: SQSMessageAttributes,
+    configure?: ConfigureSqsDelegate,
+  ): Promise<SendMessageResult> {
     const attributes = {
+      ...messageTypeConverter(defaultAttributes ?? {}),
       ...messageTypeConverter(sqsMessage.getAttributes()),
     };
 
@@ -31,13 +42,17 @@ export class MessagePublisher implements IMessagePublisher {
       };
     }
 
-    const message: SendMessageRequest = {
+    const params: SendMessageRequest = {
       MessageAttributes: attributes,
       MessageBody: sqsMessage.getBody(),
       QueueUrl: sqsMessage.getQueueUrl(),
     };
 
-    return this.sqsPublisher.sendMessage(message);
+    if (typeof configure === 'function') {
+      await configure(params);
+    }
+
+    return this.sqsPublisher.sendMessage(params);
   }
 }
 

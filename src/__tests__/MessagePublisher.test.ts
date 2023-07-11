@@ -170,4 +170,50 @@ describe('MessagePublisher', () => {
       context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
     ).toHaveBeenCalledWith(message);
   });
+
+  test('Merges the default attributes', async () => {
+    let found = false;
+    const sqsPublisher: ISqsPublisher = {
+      async sendMessage(): Promise<SendMessageResult> {
+        return {};
+      },
+    };
+
+    const publisher = new MessagePublisher(sqsPublisher, {
+      resolveLevel() {
+        return 'debug';
+      },
+    });
+
+    const message = new TestBodyMessage(type, jobId, body);
+    await publisher.publish(message, { 'X-Default': { dataType: 'String', stringValue: 'Test!' } }, async (x) => {
+      const foundAttributes = x.MessageAttributes ?? {};
+      found = foundAttributes['X-Default']?.StringValue === 'Test!';
+    });
+
+    expect(found).toBeTruthy();
+  });
+
+  test('Calls the configuration delegate', async () => {
+    let params: SendMessageRequest | undefined;
+    const sqsPublisher: ISqsPublisher = {
+      async sendMessage(message: SendMessageRequest): Promise<SendMessageResult> {
+        params = message;
+        return {};
+      },
+    };
+
+    const publisher = new MessagePublisher(sqsPublisher, {
+      resolveLevel() {
+        return 'debug';
+      },
+    });
+
+    const message = new TestBodyMessage(type, jobId, body);
+    await publisher.publish(message, {}, async (x) => {
+      x.DelaySeconds = 1000;
+    });
+
+    expect(params?.DelaySeconds).toEqual(1000);
+  });
 });
