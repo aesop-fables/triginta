@@ -129,6 +129,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
         const injectContextualServices = createServiceModule('injectContextualServices', (services) => {
           services.singleton<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
           services.singleton<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
+          services.singleton<APIGatewayEventRequestContextV2>(HttpLambdaServices.CurrentContext, request.context);
 
           services.factory<IRequestContext>(
             HttpLambdaServices.RequestContext,
