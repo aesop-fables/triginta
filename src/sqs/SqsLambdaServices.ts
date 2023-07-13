@@ -10,6 +10,7 @@ export const SqsLambdaServices = {
   MessagePublisher: namedService('MessagePublisher'),
   SqsPublisher: namedService('SqsPublisher'),
   SqsSettings: namedService('SqsSettings'),
+  CurrentContext: namedService('SqsCurrentContext'),
   CurrentEvent: namedService('SqsCurrentEvent'),
   CurrentRecord: namedService('SqsCurrentRecord'),
 };

@@ -11,7 +11,7 @@ import {
   Newable,
   Scopes,
 } from '@aesop-fables/containr';
-import { SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
+import { Context, SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
 import middy from '@middy/core';
 import { ISqsMessageHandler, SqsOutput } from './ISqsMessageHandler';
 import { getMiddleware } from '../Decorators';
@@ -52,18 +52,25 @@ function embedSqsRecord(record: SQSRecord): IServiceModule {
   });
 }
 
+function embedSqsContext(context: Context): IServiceModule {
+  return createServiceModule('@aesop-fables/triginta/sqs/context', (services) => {
+    services.singleton<Context>(SqsLambdaServices.CurrentContext, context);
+  });
+}
+
 export class SqsLambdaFactory implements ISqsLambdaFactory {
   constructor(@injectContainer() private readonly container: IServiceContainer) {}
 
   createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
     newable: Newable<ISqsMessageHandler<Message, Output>>,
   ): SQSHandler {
-    const handler = async (event: SQSEvent) => {
+    const handler = async (event: SQSEvent, context: Context) => {
       for (let i = 0; i < event.Records.length; i++) {
         const record = event.Records[i];
         const childContainer = this.container.createChildContainer('sqsLambda', [
           embedSqsEvent(event),
           embedSqsRecord(record),
+          embedSqsContext(context),
         ]);
         try {
           const handler = childContainer.resolve(newable);
