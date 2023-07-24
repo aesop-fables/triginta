@@ -27,6 +27,7 @@ import { ISqsPublisher, SqsPublisher } from './SqsPublisher';
 import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
 import { SqsSettings } from './SqsSettings';
 import { CurrentRecordLoggingLevel, LoggingRegistry } from '../logging';
+import { AwsServices } from '../AwsServices';
 
 export interface BootstrappedSqsLambdaContext {
   createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
@@ -42,7 +43,7 @@ export interface ISqsLambdaFactory {
 
 function embedSqsEvent(event: SQSEvent): IServiceModule {
   return createServiceModule('@aesop-fables/triginta/sqs/event', (services) => {
-    services.singleton<SQSEvent>(SqsLambdaServices.CurrentEvent, event);
+    services.singleton<SQSEvent>(AwsServices.Event, event);
   });
 }
 
@@ -54,7 +55,7 @@ function embedSqsRecord(record: SQSRecord): IServiceModule {
 
 function embedSqsContext(context: Context): IServiceModule {
   return createServiceModule('@aesop-fables/triginta/sqs/context', (services) => {
-    services.singleton<Context>(SqsLambdaServices.CurrentContext, context);
+    services.singleton<Context>(AwsServices.Context, context);
   });
 }
 

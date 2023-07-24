@@ -1,3 +1,4 @@
+export * from './AwsServices';
 export * from './Bootstrapping';
 export * from './IHandler';
 export * from './http/IHttpEndpoint';
