@@ -5,7 +5,7 @@ import { IValidatorFactory } from './IValidatorFactory';
 import { IConfiguredValidationRule } from './IConfiguredValidationRule';
 import { ValidationServices } from './ValidationServices';
 import { IValidationFailureHandler } from './IValidationFailureHandler';
-import { IRuntimeContext } from '../http/IRuntimeContext';
+import { IRuntimeContext } from '../IRuntimeContext';
 
 export function validate(
   rules: IConfiguredValidationRule[],

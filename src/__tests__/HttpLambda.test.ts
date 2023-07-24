@@ -16,7 +16,7 @@ import {
   useMiddleware,
 } from '..';
 import middy from '@middy/core';
-import { IRuntimeContext } from '../http/IRuntimeContext';
+import { IRuntimeContext } from '../IRuntimeContext';
 import { AwsServices } from '../AwsServices';
 
 interface InitializeRequest {}

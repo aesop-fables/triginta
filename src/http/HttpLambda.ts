@@ -21,7 +21,7 @@ import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
-import { IRuntimeContext } from './IRuntimeContext';
+import { IRuntimeContext } from '../IRuntimeContext';
 import { LoggingRegistry } from '../logging/LoggingRegistry';
 import { CurrentRequestLoggingLevel } from '../logging/Levels';
 import { AwsServices } from '../AwsServices';

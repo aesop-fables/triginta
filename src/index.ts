@@ -1,6 +1,7 @@
 export * from './AwsServices';
 export * from './Bootstrapping';
 export * from './IHandler';
+export * from './IRuntimeContext';
 export * from './http/IHttpEndpoint';
 export * from './Decorators';
 export * from './http/HttpLambda';
