@@ -1,15 +1,15 @@
 import { inject } from '@aesop-fables/containr';
-import { HttpLambdaServices } from '../http/HttpLambdaServices';
 import { APIGatewayProxyEventV2, SQSRecord } from 'aws-lambda';
 import { SqsLambdaServices } from '../sqs/SqsLambdaServices';
 import { TrigintaHeaders } from '../TrigintaHeaders';
+import { AwsServices } from '../AwsServices';
 
 export interface LoggingLevel {
   resolveLevel(): string | undefined;
 }
 
 export class CurrentRequestLoggingLevel implements LoggingLevel {
-  constructor(@inject(HttpLambdaServices.CurrentEvent) private readonly event: APIGatewayProxyEventV2) {}
+  constructor(@inject(AwsServices.Event) private readonly event: APIGatewayProxyEventV2) {}
 
   resolveLevel(): string | undefined {
     return this.event.headers[TrigintaHeaders.LogLevel.toLowerCase()];

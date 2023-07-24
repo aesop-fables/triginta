@@ -24,6 +24,7 @@ import { IConfiguredRoute } from './IConfiguredRoute';
 import { IRuntimeContext } from './IRuntimeContext';
 import { LoggingRegistry } from '../logging/LoggingRegistry';
 import { CurrentRequestLoggingLevel } from '../logging/Levels';
+import { AwsServices } from '../AwsServices';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -128,8 +129,8 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
       async before(request) {
         const injectContextualServices = createServiceModule('injectContextualServices', (services) => {
           services.singleton<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
-          services.singleton<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
-          services.singleton<APIGatewayEventRequestContextV2>(HttpLambdaServices.CurrentContext, request.context);
+          services.singleton<APIGatewayProxyEventV2>(AwsServices.Event, request.event);
+          services.singleton<APIGatewayEventRequestContextV2>(AwsServices.Context, request.context);
 
           services.factory<IRuntimeContext>(
             HttpLambdaServices.RuntimeContext,

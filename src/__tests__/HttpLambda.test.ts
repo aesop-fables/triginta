@@ -17,6 +17,7 @@ import {
 } from '..';
 import middy from '@middy/core';
 import { IRuntimeContext } from '../http/IRuntimeContext';
+import { AwsServices } from '../AwsServices';
 
 interface InitializeRequest {}
 
@@ -86,7 +87,7 @@ describe('HttpLambda', () => {
         getRoute(InjectionEndpoint),
       );
 
-      const event = injectedContainer?.get<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent);
+      const event = injectedContainer?.get<APIGatewayProxyEventV2>(AwsServices.Event);
       expect(event?.rawPath).toEqual('/http-lambda/injection');
 
       const context = injectedContainer?.get<IRuntimeContext>(HttpLambdaServices.RuntimeContext);
