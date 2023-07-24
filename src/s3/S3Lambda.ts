@@ -13,7 +13,8 @@ import middy from '@middy/core';
 import { IS3RecordHandler } from './IS3RecordHandler';
 import { getMiddleware } from '../Decorators';
 import { S3LambdaServices } from './S3LambdaServices';
-import { S3Event, S3EventRecord, S3Handler } from 'aws-lambda';
+import { Context, S3Event, S3EventRecord, S3Handler } from 'aws-lambda';
+import { AwsServices } from '../AwsServices';
 
 export interface BootstrappedS3LambdaContext {
   createS3Handler(newable: Newable<IS3RecordHandler>): S3Handler;
@@ -25,7 +26,13 @@ export interface IS3LambdaFactory {
 
 function embedS3Event(event: S3Event): IServiceModule {
   return createServiceModule('@aesop-fables/triginta/s3/event', (services) => {
-    services.singleton<S3Event>(S3LambdaServices.CurrentEvent, event);
+    services.singleton<S3Event>(AwsServices.Event, event);
+  });
+}
+
+function embedS3Context(context: Context): IServiceModule {
+  return createServiceModule('@aesop-fables/triginta/s3/context', (services) => {
+    services.singleton<Context>(AwsServices.Context, context);
   });
 }
 
@@ -43,12 +50,13 @@ export class S3LambdaFactory implements IS3LambdaFactory {
   constructor(@injectContainer() private readonly container: IServiceContainer) {}
 
   createHandler(newable: Newable<IS3RecordHandler>): S3Handler {
-    const handler = async (event: S3Event) => {
+    const handler = async (event: S3Event, context: Context) => {
       for (let i = 0; i < event.Records.length; i++) {
         const record = event.Records[i];
         const childContainer = this.container.createChildContainer('s3Lambda', [
           embedS3Event(event),
           embedS3Record(record),
+          embedS3Context(context),
         ]);
         try {
           const handler = childContainer.resolve(newable);
