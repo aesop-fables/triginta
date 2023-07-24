@@ -1,8 +1,12 @@
+import { createServiceNamespacer } from '../Utils';
+
+const keyFor = createServiceNamespacer('http');
+
 export const HttpLambdaServices = {
-  CurrentContext: 'currentContext',
-  CurrentEvent: 'currentEvent',
-  CurrentRoute: 'currentRoute',
-  HttpLambdaFactory: 'HttpLambdaFactory',
-  HttpResponseGenerator: 'HttpResponseGenerator',
-  RuntimeContext: 'runtimeContext',
+  CurrentContext: keyFor('currentContext'),
+  CurrentEvent: keyFor('currentEvent'),
+  CurrentRoute: keyFor('currentRoute'),
+  HttpLambdaFactory: keyFor('httpLambdaFactory'),
+  HttpResponseGenerator: keyFor('httpResponseGenerator'),
+  RuntimeContext: keyFor('runtimeContext'),
 };
