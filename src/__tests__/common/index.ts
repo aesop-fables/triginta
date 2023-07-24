@@ -1,5 +1,5 @@
 import { createServiceModule, inject } from '@aesop-fables/containr';
-import { IHttpEndpoint, httpPut, errorWrapper, convertNullTo200, xssFilter } from '../../';
+import { IHttpEndpoint, httpPut } from '../../';
 import { useMiddleware } from '../../Decorators';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHanlder from '@middy/http-error-handler';
@@ -37,7 +37,7 @@ export const TestServices = {
 };
 
 @httpPut('testpath')
-@useMiddleware(errorWrapper, httpJsonBodyParser, xssFilter, convertNullTo200, httpErrorHanlder)
+@useMiddleware(httpJsonBodyParser, httpErrorHanlder)
 export class CreateStatusAlertEndpoint implements IHttpEndpoint<CreateStatusAlertRequest, StatusAlert> {
   constructor(@inject(TestServices.Recorder) private readonly recorder: IRecorder) {}
   async handle(request: CreateStatusAlertRequest): Promise<StatusAlert> {

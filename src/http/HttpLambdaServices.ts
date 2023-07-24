@@ -4,5 +4,5 @@ export const HttpLambdaServices = {
   CurrentRoute: 'currentRoute',
   HttpLambdaFactory: 'HttpLambdaFactory',
   HttpResponseGenerator: 'HttpResponseGenerator',
-  RequestContext: 'requestContext',
+  RuntimeContext: 'runtimeContext',
 };

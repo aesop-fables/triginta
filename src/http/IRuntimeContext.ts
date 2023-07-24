@@ -1,5 +1,5 @@
 import { IServiceContainer } from '@aesop-fables/containr';
 
-export interface IRequestContext {
+export interface IRuntimeContext {
   container: IServiceContainer;
 }

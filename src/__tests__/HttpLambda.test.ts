@@ -16,7 +16,7 @@ import {
   useMiddleware,
 } from '..';
 import middy from '@middy/core';
-import { IRequestContext } from '../http/IRequestContext';
+import { IRuntimeContext } from '../http/IRuntimeContext';
 
 interface InitializeRequest {}
 
@@ -58,7 +58,7 @@ describe('HttpLambda', () => {
         return () => {
           return {
             async before(request) {
-              injectedContainer = (request.context as unknown as IRequestContext).container;
+              injectedContainer = (request.context as unknown as IRuntimeContext).container;
             },
           };
         };
@@ -89,7 +89,7 @@ describe('HttpLambda', () => {
       const event = injectedContainer?.get<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent);
       expect(event?.rawPath).toEqual('/http-lambda/injection');
 
-      const context = injectedContainer?.get<IRequestContext>(HttpLambdaServices.RequestContext);
+      const context = injectedContainer?.get<IRuntimeContext>(HttpLambdaServices.RuntimeContext);
       expect(context?.container).toEqual(injectedContainer);
     });
 

@@ -21,7 +21,7 @@ import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
-import { IRequestContext } from './IRequestContext';
+import { IRuntimeContext } from './IRuntimeContext';
 import { LoggingRegistry } from '../logging/LoggingRegistry';
 import { CurrentRequestLoggingLevel } from '../logging/Levels';
 
@@ -131,8 +131,8 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
           services.singleton<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
           services.singleton<APIGatewayEventRequestContextV2>(HttpLambdaServices.CurrentContext, request.context);
 
-          services.factory<IRequestContext>(
-            HttpLambdaServices.RequestContext,
+          services.factory<IRuntimeContext>(
+            HttpLambdaServices.RuntimeContext,
             (current) => {
               return {
                 container: current,
