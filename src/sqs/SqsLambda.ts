@@ -12,7 +12,6 @@ import {
   Scopes,
 } from '@aesop-fables/containr';
 import { Context, SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
-import middy from '@middy/core';
 import { ISqsMessageHandler, SqsOutput } from './ISqsMessageHandler';
 import { getMiddleware } from '../Decorators';
 import { SqsLambdaServices } from './SqsLambdaServices';
@@ -28,6 +27,7 @@ import { IMessagePublisher, MessagePublisher } from './MessagePublisher';
 import { SqsSettings } from './SqsSettings';
 import { CurrentRecordLoggingLevel, LoggingRegistry } from '../logging';
 import { AwsServices } from '../AwsServices';
+import { resolveTrigintaRuntime, trigintafy } from '../TrigintaMiddleware';
 
 export interface BootstrappedSqsLambdaContext {
   createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
@@ -68,16 +68,23 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
     const handler = async (event: SQSEvent, context: Context) => {
       for (let i = 0; i < event.Records.length; i++) {
         const record = event.Records[i];
-        const childContainer = this.container.createChildContainer('sqsLambda', [
+        // This should be resolved from the runtime
+        const { container } = resolveTrigintaRuntime(context);
+        if (!container) {
+          throw new Error('No container found in the context');
+        }
+        const childContainer = container.createChildContainer('sqsLambda', [
           embedSqsEvent(event),
           embedSqsRecord(record),
           embedSqsContext(context),
         ]);
         try {
-          const handler = childContainer.resolve(newable);
+          const innerHandler = childContainer.resolve(newable);
           const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
           const message = await deserializer.deserializeMessage<Message>(record);
-          await handler.handle(message as Message, record, event);
+          await innerHandler.handle(message as Message, record, event);
+
+          // TODO -- Add the failure handler
         } finally {
           if (childContainer) {
             try {
@@ -90,16 +97,12 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
       }
     };
 
-    const middlewareMetadata = getMiddleware(newable);
-    if (middlewareMetadata) {
-      let midHandler = middy(handler);
-      middlewareMetadata.forEach((midFunc: Function) => {
-        midHandler = midHandler.use(midFunc());
-      });
-      return midHandler;
-    }
-
-    return handler;
+    const middlewareMetadata = getMiddleware(newable) || [];
+    return trigintafy(handler, middlewareMetadata, {
+      container: this.container,
+      source: 'http',
+      overrides: [],
+    });
   }
 }
 

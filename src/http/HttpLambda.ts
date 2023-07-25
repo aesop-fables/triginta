@@ -21,10 +21,9 @@ import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
-import { IRuntimeContext, resolveTrigintaRuntime, trigintaMiddlware } from '../TrigintaMiddleware';
+import { resolveTrigintaRuntime, trigintafy, trigintaMiddlware } from '../TrigintaMiddleware';
 import { LoggingRegistry } from '../logging/LoggingRegistry';
 import { CurrentRequestLoggingLevel } from '../logging/Levels';
-import { AwsServices } from '../AwsServices';
 
 export declare type NonNoisyEvent = Omit<APIGatewayProxyEventV2, 'requestContext'>;
 
@@ -131,18 +130,11 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
       // TODO -- Register the AwsServices
     });
 
-    let midHandler = middy(handler).use(
-      trigintaMiddlware({
-        container,
-        source: 'http',
-        overrides: [httpRuntimeOverrides],
-      }),
-    );
-    middlewareMetadata.forEach((midFunc: Function) => {
-      midHandler = midHandler.use(midFunc());
+    return trigintafy(handler, middlewareMetadata, {
+      container,
+      source: 'http',
+      overrides: [httpRuntimeOverrides],
     });
-
-    return midHandler;
   }
 }
 

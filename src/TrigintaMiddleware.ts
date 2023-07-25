@@ -8,11 +8,6 @@ import { ITrigintaRuntimeFactory } from './ITrigintaRuntimeFactory';
 import { TrigintaServices } from './TrigintaServices';
 import { EventSource } from './EventSource';
 
-// TODO -- Not sure what this is going to turn into yet
-export interface IRuntimeContext {
-  container: IServiceContainer;
-}
-
 export interface TrigintaMiddlewareOptions {
   container: IServiceContainer;
   overrides: IServiceModule[];
@@ -43,4 +38,22 @@ export function trigintaMiddlware<TEvent, TContext extends Context = Context>(op
   };
 
   return { after, before };
+}
+
+interface MiddyHandler<TEvent, TContext extends Context = Context> {
+  (event: TEvent, context: TContext): Promise<any>;
+}
+
+export function trigintafy<TEvent, TContext extends Context = Context>(
+  handler: MiddyHandler<TEvent, TContext>,
+  middlewareMetadata: any[],
+  options: TrigintaMiddlewareOptions,
+) {
+  let midHandler = middy(handler).use(trigintaMiddlware(options));
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  middlewareMetadata.forEach((midFunc: Function) => {
+    midHandler = midHandler.use(midFunc());
+  });
+
+  return midHandler;
 }
