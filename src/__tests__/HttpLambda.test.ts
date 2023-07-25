@@ -1,6 +1,11 @@
 import 'reflect-metadata';
 import { createServiceModule, IServiceContainer, Newable, Scopes } from '@aesop-fables/containr';
-import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
+import {
+  APIGatewayEventRequestContext,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyStructuredResultV2,
+  Handler,
+} from 'aws-lambda';
 import {
   getRoute,
   httpGet,
@@ -16,8 +21,9 @@ import {
   useMiddleware,
 } from '..';
 import middy from '@middy/core';
-import { IRuntimeContext } from '../IRuntimeContext';
-import { AwsServices } from '../AwsServices';
+import { resolveTrigintaRuntime } from '../TrigintaMiddleware';
+import { ITrigintaRuntime } from '../ITrigintaRuntime';
+import { TrigintaServices } from '../TrigintaServices';
 
 interface InitializeRequest {}
 
@@ -59,7 +65,7 @@ describe('HttpLambda', () => {
         return () => {
           return {
             async before(request) {
-              injectedContainer = (request.context as unknown as IRuntimeContext).container;
+              injectedContainer = resolveTrigintaRuntime(request.context).container;
             },
           };
         };
@@ -87,11 +93,11 @@ describe('HttpLambda', () => {
         getRoute(InjectionEndpoint),
       );
 
-      const event = injectedContainer?.get<APIGatewayProxyEventV2>(AwsServices.Event);
-      expect(event?.rawPath).toEqual('/http-lambda/injection');
-
-      const context = injectedContainer?.get<IRuntimeContext>(HttpLambdaServices.RuntimeContext);
-      expect(context?.container).toEqual(injectedContainer);
+      const runtime = injectedContainer?.get<ITrigintaRuntime<APIGatewayProxyEventV2, APIGatewayEventRequestContext>>(
+        TrigintaServices.Runtime,
+      );
+      expect(runtime?.event?.rawPath).toEqual('/http-lambda/injection');
+      expect(runtime?.container).toEqual(injectedContainer);
     });
 
     test('no input model', async () => {
