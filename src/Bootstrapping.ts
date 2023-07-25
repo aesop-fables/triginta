@@ -14,8 +14,6 @@ import { BootstrappedSqsLambdaContext, createBootstrappedSqsLambdaContext, useTr
 import { BootstrappedS3LambdaContext, createBootstrappedS3LambdaContext, useTrigintaS3 } from './s3/S3Lambda';
 import { TrigintaServices, createCoreKey } from './TrigintaServices';
 import { TrigintaRuntimeFactory } from './ITrigintaRuntimeFactory';
-import { ITrigintaRuntime } from './ITrigintaRuntime';
-import { Context } from 'aws-lambda';
 
 declare type Placeholder = object;
 
