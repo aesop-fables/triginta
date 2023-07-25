@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
