@@ -73,7 +73,7 @@ export function createTrigintaApp(options: TrigintaOptions): BootstrappedTrigint
         ]);
         break;
       case 's3':
-        container = createContainer([useTrigintaS3, ...modules]);
+        container = createContainer([useTriginta, useTrigintaS3, ...modules]);
         break;
       case 'sqs':
         const { matchers = [] } = serviceOptions as TrigintaSqsOptions;

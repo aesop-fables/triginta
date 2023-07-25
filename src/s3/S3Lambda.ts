@@ -15,6 +15,7 @@ import { getMiddleware } from '../Decorators';
 import { S3LambdaServices } from './S3LambdaServices';
 import { Context, S3Event, S3EventRecord, S3Handler } from 'aws-lambda';
 import { AwsServices } from '../AwsServices';
+import { resolveTrigintaRuntime, trigintafy } from '../TrigintaMiddleware';
 
 export interface BootstrappedS3LambdaContext {
   createS3Handler(newable: Newable<IS3RecordHandler>): S3Handler;
@@ -52,8 +53,13 @@ export class S3LambdaFactory implements IS3LambdaFactory {
   createHandler(newable: Newable<IS3RecordHandler>): S3Handler {
     const handler = async (event: S3Event, context: Context) => {
       for (let i = 0; i < event.Records.length; i++) {
+        const { container } = resolveTrigintaRuntime<S3Event>(context);
+        if (!container) {
+          throw new Error('No container found in the context');
+        }
+
         const record = event.Records[i];
-        const childContainer = this.container.createChildContainer('s3Lambda', [
+        const childContainer = container.createChildContainer('s3Lambda', [
           embedS3Event(event),
           embedS3Record(record),
           embedS3Context(context),
@@ -61,6 +67,8 @@ export class S3LambdaFactory implements IS3LambdaFactory {
         try {
           const handler = childContainer.resolve(newable);
           await handler.handle(record, event);
+
+          // TODO -- Add the failure handler
         } finally {
           if (childContainer) {
             try {
@@ -73,16 +81,12 @@ export class S3LambdaFactory implements IS3LambdaFactory {
       }
     };
 
-    const middlewareMetadata = getMiddleware(newable);
-    if (middlewareMetadata) {
-      let midHandler = middy(handler);
-      middlewareMetadata.forEach((midFunc: Function) => {
-        midHandler = midHandler.use(midFunc());
-      });
-      return midHandler;
-    }
-
-    return handler;
+    const middlewareMetadata = getMiddleware(newable) || [];
+    return trigintafy(handler, middlewareMetadata, {
+      container: this.container,
+      source: 's3',
+      overrides: [],
+    });
   }
 }
 

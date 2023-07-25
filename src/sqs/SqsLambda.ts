@@ -69,7 +69,7 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
       for (let i = 0; i < event.Records.length; i++) {
         const record = event.Records[i];
         // This should be resolved from the runtime
-        const { container } = resolveTrigintaRuntime(context);
+        const { container } = resolveTrigintaRuntime<SQSEvent>(context);
         if (!container) {
           throw new Error('No container found in the context');
         }
@@ -100,7 +100,7 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
     const middlewareMetadata = getMiddleware(newable) || [];
     return trigintafy(handler, middlewareMetadata, {
       container: this.container,
-      source: 'http',
+      source: 'sqs',
       overrides: [],
     });
   }
