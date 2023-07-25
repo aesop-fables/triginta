@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { createServiceModule, inject } from '@aesop-fables/containr';
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
@@ -11,6 +12,8 @@ import {
   IQueue,
   Queue,
   createTrigintaApp,
+  SqsLambdaServices,
+  ISqsRecordFailureHandler,
 } from '..';
 
 interface TestMessage extends ISqsMessage {
@@ -21,7 +24,11 @@ interface TestMessage extends ISqsMessage {
 
 const recorderKey = 'messageRecorder';
 
-class MessageRecorder<Message> {
+interface IMessageRecorder<Message> {
+  record(message: Message): void;
+}
+
+class MessageRecorder<Message> implements IMessageRecorder<Message> {
   readonly messages: Message[] = [];
 
   record(message: Message): void {
@@ -70,6 +77,26 @@ const useRecorder = createServiceModule('useRecorder', (services) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   services.singleton<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
 );
+
+class RecordingFailureHandler implements ISqsRecordFailureHandler {
+  readonly errors: any[] = [];
+
+  async onError(record: SQSRecord, error: any): Promise<boolean> {
+    this.errors.push(error);
+    return true;
+  }
+}
+
+const useErrorGeneratingRecorder = createServiceModule('useErrorGeneratingRecorder', (services) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  services.singleton<IMessageRecorder<any>>(recorderKey, {
+    record() {
+      throw new Error(`Recorder`);
+    },
+  });
+
+  services.singleton<ISqsRecordFailureHandler>(SqsLambdaServices.FailureHandler, new RecordingFailureHandler());
+});
 
 describe('SqsLambda', () => {
   describe('initialize', () => {
@@ -141,6 +168,42 @@ describe('SqsLambda', () => {
       expect(recorder.messages[0].tenant).toBe('my-tenant');
       expect(recorder.messages[0].options.id).toBe('test');
       expect(recorder.messages[0].options.subdomain).toBe('first-dibs');
+    });
+
+    test('custom error middleware', async () => {
+      const { containers } = createTrigintaApp({
+        sqs: {
+          modules: [useErrorGeneratingRecorder],
+        },
+      });
+      const { sqs: container } = containers;
+
+      const messageId = 'ab21cfc17e80409baaa5d301b628b6fe';
+      const response = await TestUtils.invokeSqsHandler({
+        container,
+        handler: TestHandler<SpinUpTenantMessage>,
+        Records: [
+          {
+            awsRegion: 'us-west-2',
+            messageId,
+            eventSource: 'aws:sqs',
+            eventSourceARN: 'test',
+            receiptHandle: 'test',
+            messageAttributes: {
+              [TrigintaMessageHeaders.MessageType]: { dataType: 'string', stringValue: SpinUpMessageType },
+              [TenantKey]: { dataType: 'string', stringValue: 'my-tenant' },
+            } as SQSMessageAttributes,
+            body: JSON.stringify({ id: 'test', subdomain: 'first-dibs' } as TenantOptions),
+          } as SQSRecord,
+        ],
+      });
+
+      expect(response.batchItemFailures.length).toEqual(1);
+      expect(response.batchItemFailures[0].itemIdentifier).toEqual(messageId);
+
+      const failureHandler = container.get<RecordingFailureHandler>(SqsLambdaServices.FailureHandler);
+      expect(failureHandler.errors.length).toEqual(1);
+      expect(failureHandler.errors[0].message).toEqual('Recorder');
     });
   });
 });

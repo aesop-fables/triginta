@@ -5,7 +5,7 @@ import { IValidatorFactory } from './IValidatorFactory';
 import { IConfiguredValidationRule } from './IConfiguredValidationRule';
 import { ValidationServices } from './ValidationServices';
 import { IValidationFailureHandler } from './IValidationFailureHandler';
-import { IRequestContext } from '../http/IRequestContext';
+import { resolveTrigintaRuntime } from '../TrigintaMiddleware';
 
 export function validate(
   rules: IConfiguredValidationRule[],
@@ -13,7 +13,7 @@ export function validate(
   return () => {
     return {
       async before(request) {
-        const container = (request.context as unknown as IRequestContext).container;
+        const { container } = resolveTrigintaRuntime(request.context);
         const validator = container.get<IValidatorFactory>(ValidationServices.ValidatorFactory).create(rules);
         const failureHandler = container.get<IValidationFailureHandler>(ValidationServices.ValidationFailureHandler);
         const model = request.event.body as unknown as object;

@@ -21,7 +21,7 @@ import { IHttpEndpoint, IHttpEventHandler } from './IHttpEndpoint';
 import { getMiddleware, getRoute } from '../Decorators';
 import { HttpLambdaServices } from './HttpLambdaServices';
 import { IConfiguredRoute } from './IConfiguredRoute';
-import { IRequestContext } from './IRequestContext';
+import { resolveTrigintaRuntime, trigintafy, trigintaMiddlware } from '../TrigintaMiddleware';
 import { LoggingRegistry } from '../logging/LoggingRegistry';
 import { CurrentRequestLoggingLevel } from '../logging/Levels';
 
@@ -96,7 +96,7 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
     }
 
     const handler = async (event: NonNoisyEvent, context: any) => {
-      const childContainer = context['container'] as IServiceContainer | undefined;
+      const childContainer = resolveTrigintaRuntime(context).container;
       if (!childContainer) {
         throw new Error('No container found in the context');
       }
@@ -124,36 +124,17 @@ export class HttpLambdaFactory implements IHttpLambdaFactory {
 
     const { container } = this;
     const middlewareMetadata = getMiddleware(newable) ?? [];
-    let midHandler = middy(handler).use({
-      async before(request) {
-        const injectContextualServices = createServiceModule('injectContextualServices', (services) => {
-          services.singleton<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
-          services.singleton<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent, request.event);
-          services.singleton<APIGatewayEventRequestContextV2>(HttpLambdaServices.CurrentContext, request.context);
+    const httpRuntimeOverrides = createServiceModule('httpRuntimeOverrides', (services) => {
+      services.singleton<IConfiguredRoute>(HttpLambdaServices.CurrentRoute, route);
 
-          services.factory<IRequestContext>(
-            HttpLambdaServices.RequestContext,
-            (current) => {
-              return {
-                container: current,
-              };
-            },
-            Scopes.Transient,
-          );
-        });
-
-        const childContainer = container.createChildContainer('httpLambda', [injectContextualServices]);
-        request.context['container'] = childContainer;
-      },
-      after(request) {
-        request.context['container']?.dispose();
-      },
-    });
-    middlewareMetadata.forEach((midFunc: Function) => {
-      midHandler = midHandler.use(midFunc());
+      // TODO -- Register the AwsServices
     });
 
-    return midHandler;
+    return trigintafy(handler, middlewareMetadata, {
+      container,
+      source: 'http',
+      overrides: [httpRuntimeOverrides],
+    });
   }
 }
 

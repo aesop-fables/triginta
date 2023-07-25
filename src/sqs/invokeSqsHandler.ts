@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { SQSEvent } from 'aws-lambda';
+import { SQSBatchResponse, SQSEvent } from 'aws-lambda';
 import { IServiceContainer, Newable } from '@aesop-fables/containr';
 import middy from '@middy/core';
 import { ISqsLambdaFactory } from './SqsLambda';
@@ -18,11 +18,11 @@ export interface SqsInvocationContext extends Partial<SQSEvent> {
  * @param context
  * @returns
  */
-export async function invokeSqsHandler(context: SqsInvocationContext): Promise<void> {
+export async function invokeSqsHandler(context: SqsInvocationContext): Promise<SQSBatchResponse> {
   const { container } = context;
   const factory = container.get<ISqsLambdaFactory>(SqsLambdaServices.SqsLambdaFactory);
   const configuredHandler = factory.createHandler(
-    context.handler as Newable<ISqsMessageHandler<any, any>>,
+    context.handler as Newable<ISqsMessageHandler<any>>,
   ) as middy.MiddyfiedHandler<SQSEvent>;
 
   context.Records?.forEach((record) => {
@@ -55,6 +55,6 @@ export async function invokeSqsHandler(context: SqsInvocationContext): Promise<v
     },
   };
 
-  const response = await configuredHandler(event, handlerContext);
+  const response = (await configuredHandler(event, handlerContext)) as SQSBatchResponse;
   return response;
 }
