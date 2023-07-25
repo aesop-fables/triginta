@@ -1,6 +1,11 @@
 import 'reflect-metadata';
 import { createServiceModule, IServiceContainer, Newable, Scopes } from '@aesop-fables/containr';
-import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2, Handler } from 'aws-lambda';
+import {
+  APIGatewayEventRequestContext,
+  APIGatewayProxyEventV2,
+  APIGatewayProxyStructuredResultV2,
+  Handler,
+} from 'aws-lambda';
 import {
   getRoute,
   httpGet,
@@ -14,9 +19,11 @@ import {
   TestUtils,
   createTrigintaApp,
   useMiddleware,
+  resolveTrigintaRuntime,
+  ITrigintaRuntime,
+  TrigintaServices,
 } from '..';
 import middy from '@middy/core';
-import { IRequestContext } from '../http/IRequestContext';
 
 interface InitializeRequest {}
 
@@ -58,7 +65,7 @@ describe('HttpLambda', () => {
         return () => {
           return {
             async before(request) {
-              injectedContainer = (request.context as unknown as IRequestContext).container;
+              injectedContainer = resolveTrigintaRuntime(request.context).container;
             },
           };
         };
@@ -86,11 +93,11 @@ describe('HttpLambda', () => {
         getRoute(InjectionEndpoint),
       );
 
-      const event = injectedContainer?.get<APIGatewayProxyEventV2>(HttpLambdaServices.CurrentEvent);
-      expect(event?.rawPath).toEqual('/http-lambda/injection');
-
-      const context = injectedContainer?.get<IRequestContext>(HttpLambdaServices.RequestContext);
-      expect(context?.container).toEqual(injectedContainer);
+      const runtime = injectedContainer?.get<ITrigintaRuntime<APIGatewayProxyEventV2, APIGatewayEventRequestContext>>(
+        TrigintaServices.Runtime,
+      );
+      expect(runtime?.event?.rawPath).toEqual('/http-lambda/injection');
+      expect(runtime?.container).toEqual(injectedContainer);
     });
 
     test('no input model', async () => {
@@ -128,10 +135,14 @@ describe('HttpLambda', () => {
       }
 
       const useCustomFactory = createServiceModule('customHttpLambdaFactory', (services) => {
-        services.register<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory, (container) => {
-          const inner = new HttpLambdaFactory(container);
-          return new CustomHttpLambdaFactory(inner);
-        });
+        services.factory<IHttpLambdaFactory>(
+          HttpLambdaServices.HttpLambdaFactory,
+          (container) => {
+            const inner = new HttpLambdaFactory(container);
+            return new CustomHttpLambdaFactory(inner);
+          },
+          Scopes.Transient,
+        );
       });
 
       const { containers } = createTrigintaApp({
