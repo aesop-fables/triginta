@@ -19,11 +19,11 @@ import {
   TestUtils,
   createTrigintaApp,
   useMiddleware,
+  resolveTrigintaRuntime,
+  ITrigintaRuntime,
+  TrigintaServices,
 } from '..';
 import middy from '@middy/core';
-import { resolveTrigintaRuntime } from '../TrigintaMiddleware';
-import { ITrigintaRuntime } from '../ITrigintaRuntime';
-import { TrigintaServices } from '../TrigintaServices';
 
 interface InitializeRequest {}
 
@@ -135,10 +135,14 @@ describe('HttpLambda', () => {
       }
 
       const useCustomFactory = createServiceModule('customHttpLambdaFactory', (services) => {
-        services.register<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory, (container) => {
-          const inner = new HttpLambdaFactory(container);
-          return new CustomHttpLambdaFactory(inner);
-        });
+        services.factory<IHttpLambdaFactory>(
+          HttpLambdaServices.HttpLambdaFactory,
+          (container) => {
+            const inner = new HttpLambdaFactory(container);
+            return new CustomHttpLambdaFactory(inner);
+          },
+          Scopes.Transient,
+        );
       });
 
       const { containers } = createTrigintaApp({

@@ -11,8 +11,8 @@ import {
   Newable,
   Scopes,
 } from '@aesop-fables/containr';
-import { Context, SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
-import { ISqsMessageHandler, SqsOutput } from './ISqsMessageHandler';
+import { Context, SQSBatchResponse, SQSEvent, SQSHandler, SQSRecord } from 'aws-lambda';
+import { ISqsMessageHandler } from './ISqsMessageHandler';
 import { getMiddleware } from '../Decorators';
 import { SqsLambdaServices } from './SqsLambdaServices';
 import { ISqsMessage } from './ISqsMessage';
@@ -28,17 +28,14 @@ import { SqsSettings } from './SqsSettings';
 import { CurrentRecordLoggingLevel, LoggingRegistry } from '../logging';
 import { AwsServices } from '../AwsServices';
 import { resolveTrigintaRuntime, trigintafy } from '../TrigintaMiddleware';
+import { ISqsRecordFailureHandler, SqsRecordFailureHandler } from './ISqsFailureHandler';
 
 export interface BootstrappedSqsLambdaContext {
-  createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
-    newable: Newable<ISqsMessageHandler<Message, Output>>,
-  ): SQSHandler;
+  createSqsHandler<Message extends ISqsMessage>(newable: Newable<ISqsMessageHandler<Message>>): SQSHandler;
 }
 
 export interface ISqsLambdaFactory {
-  createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
-    newable: Newable<ISqsMessageHandler<Message, Output>>,
-  ): SQSHandler;
+  createHandler<Message extends ISqsMessage>(newable: Newable<ISqsMessageHandler<Message>>): SQSHandler;
 }
 
 function embedSqsEvent(event: SQSEvent): IServiceModule {
@@ -62,39 +59,53 @@ function embedSqsContext(context: Context): IServiceModule {
 export class SqsLambdaFactory implements ISqsLambdaFactory {
   constructor(@injectContainer() private readonly container: IServiceContainer) {}
 
-  createHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
-    newable: Newable<ISqsMessageHandler<Message, Output>>,
-  ): SQSHandler {
+  createHandler<Message extends ISqsMessage>(newable: Newable<ISqsMessageHandler<Message>>): SQSHandler {
     const handler = async (event: SQSEvent, context: Context) => {
+      const response: SQSBatchResponse = {
+        batchItemFailures: [],
+      };
+
       for (let i = 0; i < event.Records.length; i++) {
         const record = event.Records[i];
-        // This should be resolved from the runtime
-        const { container } = resolveTrigintaRuntime<SQSEvent>(context);
-        if (!container) {
-          throw new Error('No container found in the context');
-        }
-        const childContainer = container.createChildContainer('sqsLambda', [
-          embedSqsEvent(event),
-          embedSqsRecord(record),
-          embedSqsContext(context),
-        ]);
         try {
-          const innerHandler = childContainer.resolve(newable);
-          const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
-          const message = await deserializer.deserializeMessage<Message>(record);
-          await innerHandler.handle(message as Message, record, event);
+          const { container } = resolveTrigintaRuntime<SQSEvent>(context);
+          if (!container) {
+            throw new Error('No container found in the context');
+          }
 
-          // TODO -- Add the failure handler
-        } finally {
-          if (childContainer) {
-            try {
-              childContainer.dispose();
-            } catch {
-              // no-op
+          const childContainer = container.createChildContainer('sqsLambda', [
+            embedSqsEvent(event),
+            embedSqsRecord(record),
+            embedSqsContext(context),
+          ]);
+
+          try {
+            const innerHandler = childContainer.resolve(newable);
+            const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
+            const message = await deserializer.deserializeMessage<Message>(record);
+            await innerHandler.handle(message as Message, record, event);
+          } finally {
+            if (childContainer) {
+              try {
+                childContainer.dispose();
+              } catch {
+                // no-op
+              }
             }
+          }
+        } catch (e) {
+          const failureHandler = this.container.get<ISqsRecordFailureHandler>(SqsLambdaServices.FailureHandler);
+          const shouldReport = await failureHandler.onError(record, e);
+
+          if (shouldReport) {
+            response.batchItemFailures.push({
+              itemIdentifier: record.messageId,
+            });
           }
         }
       }
+
+      return response;
     };
 
     const middlewareMetadata = getMiddleware(newable) || [];
@@ -131,6 +142,11 @@ export const useTrigintaSqs = createServiceModuleWithOptions<TrigintaLegacySqsOp
       Scopes.Transient,
     );
     services.autoResolve<ISqsPublisher>(SqsLambdaServices.SqsPublisher, SqsPublisher, Scopes.Transient);
+    services.autoResolve<ISqsRecordFailureHandler>(
+      SqsLambdaServices.FailureHandler,
+      SqsRecordFailureHandler,
+      Scopes.Transient,
+    );
     services.autoResolve<IMessagePublisher>(SqsLambdaServices.MessagePublisher, MessagePublisher, Scopes.Transient);
 
     services.include(new LoggingRegistry(CurrentRecordLoggingLevel));
@@ -144,9 +160,7 @@ export interface SqsLambdaBootstrapExpression {
 
 export function createBootstrappedSqsLambdaContext(container: IServiceContainer): BootstrappedSqsLambdaContext {
   return {
-    createSqsHandler<Message extends ISqsMessage, Output extends SqsOutput = void>(
-      newable: Newable<ISqsMessageHandler<Message, Output>>,
-    ): SQSHandler {
+    createSqsHandler<Message extends ISqsMessage>(newable: Newable<ISqsMessageHandler<Message>>): SQSHandler {
       if (typeof container === 'undefined') {
         throw new Error(`SQS container not initialized`);
       }
