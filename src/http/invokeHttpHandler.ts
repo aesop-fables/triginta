@@ -45,21 +45,28 @@ export function parseRouteParams(route: string, path: string): APIGatewayProxyEv
 
   const routeParts = normalizeAndParse(route);
   const pathParts = normalizeAndParse(path);
-
-  if (routeParts.length !== pathParts.length) {
-    throw new Error(`Missing route parameters`);
-  }
-
   const params: APIGatewayProxyEventPathParameters = {};
+  let hasGreedyPath = false;
+
   for (let i = 0; i < routeParts.length; i++) {
     const part = routeParts[i];
+    const greedyResult = /\{([\w]*)\+\}/g.exec(part);
+    if (greedyResult) {
+      const paramKey = greedyResult[1];
+      params[paramKey] = [...pathParts.slice(i)].join('/');
+      hasGreedyPath = true;
+      break;
+    }
+
     const result = /\{([\w]*)\}/g.exec(part);
     if (result) {
       const paramKey = result[1];
-      const value = pathParts[i];
-
-      params[paramKey] = value;
+      params[paramKey] = pathParts[i];
     }
+  }
+
+  if (!hasGreedyPath && routeParts.length !== pathParts.length) {
+    throw new Error(`Missing route parameters`);
   }
 
   return params;
