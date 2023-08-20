@@ -17,11 +17,13 @@ export class Validator implements IValidator {
   }
 
   // not worrying about defensive coding on the model right now
-  async validate<Model extends object>(model: Model): Promise<ValidationNotification> {
-    const notification = new ValidationNotification();
+  async validate<Model extends object>(
+    model: Model,
+    notification: ValidationNotification = new ValidationNotification(),
+  ): Promise<ValidationNotification> {
     const promises = this.keys.map(async (field) => {
-      const child = await this.validateField(field, model);
-      notification.importForField(field, child);
+      await this.validateField(field, model, notification);
+      // notification.importForField(field, child);
     });
 
     await Promise.all(promises);
@@ -29,8 +31,11 @@ export class Validator implements IValidator {
     return notification;
   }
 
-  private async validateField<Model extends object>(field: string, model: Model): Promise<ValidationNotification> {
-    const child = new ValidationNotification();
+  private async validateField<Model extends object>(
+    field: string,
+    model: Model,
+    child: ValidationNotification,
+  ): Promise<ValidationNotification> {
     const context = new ValidationContext(field, model, child, this.container);
     const fieldRules = this.rules.filter((_) => _.field === field);
     await Promise.all(fieldRules.map(({ rule }) => rule.validate(context)));

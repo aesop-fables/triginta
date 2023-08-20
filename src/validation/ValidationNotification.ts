@@ -6,7 +6,7 @@ declare type MessageCache = { [key: string]: ValidationMessage[] | undefined };
 export class ValidationNotification {
   private readonly messages: MessageCache = {};
 
-  messagesFor(field: string) {
+  _getOrCreateMessages(field: string) {
     let messages = this.messages[field];
     if (typeof messages === 'undefined') {
       messages = [];
@@ -14,6 +14,10 @@ export class ValidationNotification {
     }
 
     return messages;
+  }
+
+  messagesFor(field: string) {
+    return this._getOrCreateMessages(field);
   }
 
   registerMessage(field: string, localizedString: LocalizedString) {
@@ -27,7 +31,7 @@ export class ValidationNotification {
 
     if (existing != null) return existing;
 
-    const messages = this.messagesFor(field);
+    const messages = this._getOrCreateMessages(field);
     messages.push(message);
 
     return message;
@@ -47,7 +51,7 @@ export class ValidationNotification {
     const keys = Object.keys(this.messages);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const values = this.messagesFor(key);
+      const values = this._getOrCreateMessages(key);
       values.forEach((value) => {
         action(value);
       });
@@ -61,5 +65,34 @@ export class ValidationNotification {
   importForField(field: string, notification: ValidationNotification) {
     const current = this.messagesFor(field);
     notification.messagesFor(field).forEach((_) => current.push(_));
+  }
+
+  forArray(field: string) {
+    return new PrefixedValidationNotification(field, false);
+  }
+
+  importAll(notification: ValidationNotification) {
+    notification.eachMessage((msg) => {
+      this.registerMessage(msg.field, msg.localizedString);
+    });
+  }
+}
+
+export class PrefixedValidationNotification extends ValidationNotification {
+  constructor(protected readonly prefix: string, private readonly prefixRegistration = true) {
+    super();
+  }
+
+  resolveFieldName(field: string): string {
+    return `${this.prefix ?? ''}${field}`;
+  }
+
+  override registerMessage(field: string, localizedString: LocalizedString) {
+    const resolvedField = this.prefixRegistration ? this.resolveFieldName(field) : field;
+    return super.registerMessage(resolvedField, localizedString);
+  }
+
+  forIndex(index: number) {
+    return new PrefixedValidationNotification(this.resolveFieldName(`[${index}].`));
   }
 }
