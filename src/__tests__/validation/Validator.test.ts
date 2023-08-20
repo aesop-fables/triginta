@@ -1,12 +1,12 @@
 import 'reflect-metadata';
-import { createContainer, createServiceModule, inject } from '@aesop-fables/containr';
+import { Scopes, ServiceCollection, createContainer, createServiceModule, inject } from '@aesop-fables/containr';
 import { httpPost, useMiddleware } from '../../Decorators';
 import { IHttpEndpoint } from '../../http/IHttpEndpoint';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import { invokeHttpHandler } from '../../http/invokeHttpHandler';
 import { APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { Validation } from '../..';
-import { IValidationRule } from '../../validation';
+import { IValidationRule, ValidatorFactory } from '../../validation';
 import { LocalizedString } from '../../localization';
 import { createTrigintaApp } from '../../Bootstrapping';
 
@@ -19,9 +19,15 @@ interface IEndpointRecorder {
   recordRequest(request: any): void;
 }
 
+interface TagModel {
+  key: string;
+  displayText: string;
+}
+
 interface TestModel {
   firstName: string;
   count: number;
+  tags?: TagModel[];
 }
 
 const Fugitive: LocalizedString = { key: 'Fugitive', defaultValue: 'Sounds too much like a fugitive, to me' };
@@ -34,6 +40,15 @@ class TestRule implements IValidationRule {
   }
 }
 
+const tagsSchema = Validation.parseRules<TagModel>({
+  key: {
+    required: true,
+  },
+  displayText: {
+    required: true,
+  },
+});
+
 const rules = Validation.parseRules<TestModel>({
   firstName: {
     required: true,
@@ -41,6 +56,9 @@ const rules = Validation.parseRules<TestModel>({
   },
   count: {
     required: true,
+  },
+  tags: {
+    array: tagsSchema,
   },
 });
 
@@ -66,6 +84,44 @@ describe('Validator', () => {
 
       expect(notification.messagesFor('lastName').length).toBe(0);
     });
+
+    test('registers message for missing required fields in the array', async () => {
+      const services = new ServiceCollection();
+      services.factory<Validation.Validator>(
+        Validation.ValidationServices.Validator,
+        (ctx) => {
+          return new Validation.Validator(ctx, rules);
+        },
+        Scopes.Singleton,
+      );
+      services.factory<Validation.ValidatorFactory>(
+        Validation.ValidationServices.ValidatorFactory,
+        (ctx) => {
+          return new ValidatorFactory(ctx);
+        },
+        Scopes.Singleton,
+      );
+
+      const container = services.buildContainer();
+      const validator = container.get<Validation.Validator>(Validation.ValidationServices.Validator);
+      const payload = {
+        firstName: 'test',
+        count: 1,
+        tags: [{} as TagModel, { displayText: 'test' } as TagModel],
+      } as TestModel;
+      const notification = await validator.validate(payload);
+
+      const messages = notification.allMessages();
+      expect(messages.length).toBe(3);
+      expect(messages[0].field).toBe('tags[0].key');
+      expect(messages[0].localizedString).toBe(Validation.ValidationKeys.Required);
+
+      expect(messages[1].field).toBe('tags[0].displayText');
+      expect(messages[1].localizedString).toBe(Validation.ValidationKeys.Required);
+
+      expect(messages[2].field).toBe('tags[1].key');
+      expect(messages[2].localizedString).toBe(Validation.ValidationKeys.Required);
+    }, 1000000);
   });
 
   describe('http integration', () => {
