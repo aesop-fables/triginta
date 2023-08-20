@@ -1,3 +1,4 @@
+import { ArrayContinuationRule } from './ArrayContinuationRule';
 import { IConfiguredValidationRule } from './IConfiguredValidationRule';
 import { IValidationRule } from './IValidationRule';
 import { RequiredRule } from './RequiredRule';
@@ -6,6 +7,7 @@ import { RequiredRule } from './RequiredRule';
 export declare type ValidationExpression<T> = {
   required?: boolean;
   custom?: IValidationRule[];
+  array?: IConfiguredValidationRule[];
 };
 
 export declare type ValidationSchema<Model> = {
@@ -36,6 +38,13 @@ export function parseRules<Model>(schema: ValidationSchema<Model>) {
         rule,
       }),
     );
+
+    if (typeof fieldSchema.array !== 'undefined') {
+      rules.push({
+        field,
+        rule: new ArrayContinuationRule(field, fieldSchema.array ?? []),
+      });
+    }
   });
 
   return rules;
