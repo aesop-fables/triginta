@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
-import { createServiceModule, inject } from '@aesop-fables/containr';
+import { Scopes, createServiceModule, inject } from '@aesop-fables/containr';
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
 import {
   TestUtils,
@@ -78,11 +78,14 @@ const useRecorder = createServiceModule('useRecorder', (services) =>
   services.singleton<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
 );
 
+const errorRegistry: any[] = [];
 class RecordingFailureHandler implements ISqsRecordFailureHandler {
-  readonly errors: any[] = [];
+  // Injecting contextual services here SHOULD work
+  // This is a safety net so leave it here, please.
+  constructor(@inject(SqsLambdaServices.CurrentRecord) private readonly record: SQSRecord) {}
 
   async onError(record: SQSRecord, error: any): Promise<boolean> {
-    this.errors.push(error);
+    errorRegistry.push(error);
     return true;
   }
 }
@@ -95,7 +98,11 @@ const useErrorGeneratingRecorder = createServiceModule('useErrorGeneratingRecord
     },
   });
 
-  services.singleton<ISqsRecordFailureHandler>(SqsLambdaServices.FailureHandler, new RecordingFailureHandler());
+  services.autoResolve<ISqsRecordFailureHandler>(
+    SqsLambdaServices.FailureHandler,
+    RecordingFailureHandler,
+    Scopes.Transient,
+  );
 });
 
 describe('SqsLambda', () => {
@@ -128,6 +135,10 @@ describe('SqsLambda', () => {
   // As much as possible, you WANT to be concerned with every detail of those damn records. It's annoying but it will pay off
   // in your debugging scenarios. I promise.
   describe('integration', () => {
+    beforeEach(() => {
+      errorRegistry.length = 0;
+    });
+
     test('custom message deserialization', async () => {
       const matcher = createMatcher<SpinUpTenantMessage, TenantOptions>({
         attributes: { tenant: TenantKey },
@@ -201,9 +212,8 @@ describe('SqsLambda', () => {
       expect(response.batchItemFailures.length).toEqual(1);
       expect(response.batchItemFailures[0].itemIdentifier).toEqual(messageId);
 
-      const failureHandler = container.get<RecordingFailureHandler>(SqsLambdaServices.FailureHandler);
-      expect(failureHandler.errors.length).toEqual(1);
-      expect(failureHandler.errors[0].message).toEqual('Recorder');
+      expect(errorRegistry.length).toEqual(1);
+      expect(errorRegistry[0].message).toEqual('Recorder');
     });
   });
 });
