@@ -84,6 +84,15 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
             const deserializer = childContainer.get<ISqsMessageDeserializer>(SqsLambdaServices.MessageDeserializer);
             const message = await deserializer.deserializeMessage<Message>(record);
             await innerHandler.handle(message as Message, record, event);
+          } catch (e) {
+            const failureHandler = childContainer.get<ISqsRecordFailureHandler>(SqsLambdaServices.FailureHandler);
+            const shouldReport = await failureHandler.onError(record, e);
+
+            if (shouldReport) {
+              response.batchItemFailures.push({
+                itemIdentifier: record.messageId,
+              });
+            }
           } finally {
             if (childContainer) {
               try {
@@ -94,14 +103,9 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
             }
           }
         } catch (e) {
-          const failureHandler = this.container.get<ISqsRecordFailureHandler>(SqsLambdaServices.FailureHandler);
-          const shouldReport = await failureHandler.onError(record, e);
-
-          if (shouldReport) {
-            response.batchItemFailures.push({
-              itemIdentifier: record.messageId,
-            });
-          }
+          // We need to revisit this
+          // https://github.com/aesop-fables/triginta/issues/199
+          throw e;
         }
       }
 
