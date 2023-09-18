@@ -732,9 +732,9 @@
     "@jridgewell/sourcemap-codec" "1.4.14"
 
 "@middy/core@^4.5.1":
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/@middy/core/-/core-4.5.1.tgz#808c491332fd0bea8ac033c7493893f4ee945fae"
-  integrity sha512-1UQHwZioXclzuF1AJuTnpback/orNmGEJDuflUYpX+CTUqixC8hRWnARN8M0acchwjLyFXcNKaCtyfWkI0oKqQ==
+  version "4.6.4"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-4.6.4.tgz#088bea9c8c0c05ad663310c7e39ea247294e2d72"
+  integrity sha512-yO+z6ijOFUeXJj/SOmEy2lP0ZxGGkJyaNXSUUQZdyLeNIzHtqqCvef/eIym5WZnl4prEr76sHCv0dwEmfSwYLQ==
 
 "@middy/http-error-handler@^4.5.1":
   version "4.6.0"
