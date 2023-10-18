@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { S3Event } from 'aws-lambda';
+import { KinesisStreamEvent, S3Event } from 'aws-lambda';
 import { IServiceContainer, Newable } from '@aesop-fables/containr';
 import middy from '@middy/core';
 import { IS3LambdaFactory } from './S3Lambda';
