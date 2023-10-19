@@ -18,11 +18,13 @@ import { TrigintaRuntimeFactory } from './ITrigintaRuntimeFactory';
 import { AwsServices } from './AwsServices';
 import { ITrigintaRuntime } from './ITrigintaRuntime';
 import { Context } from 'aws-lambda';
+import { useTrigintaKinesis } from './kinesis';
 
 declare type Placeholder = object;
 
 interface AwsServiceCollection {
   http: Placeholder;
+  kinesis: Placeholder;
   s3: Placeholder;
   sqs: Placeholder;
 }
@@ -50,6 +52,7 @@ export interface TrigintaSqsOptions extends AwsServiceOptions {
 
 export interface TrigintaOptions {
   http?: TrigintaHttpOptions;
+  kinesis?: TrigintaHttpOptions;
   s3?: TrigintaS3Options;
   sqs?: TrigintaSqsOptions;
 }
@@ -98,6 +101,9 @@ export function createTrigintaApp(options: TrigintaOptions): BootstrappedTrigint
           useHttpValidation,
           ...modules,
         ]);
+        break;
+      case 'kinesis':
+        container = createContainer([useTriginta, useAwsServices, useTrigintaKinesis, ...modules]);
         break;
       case 's3':
         container = createContainer([useTriginta, useAwsServices, useTrigintaS3, ...modules]);

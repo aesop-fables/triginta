@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { KinesisStreamEvent, S3Event } from 'aws-lambda';
+import { KinesisStreamBatchResponse, KinesisStreamEvent } from 'aws-lambda';
 import { IServiceContainer, Newable } from '@aesop-fables/containr';
 import middy from '@middy/core';
-import { IS3LambdaFactory } from './S3Lambda';
-import { S3LambdaServices } from './S3LambdaServices';
-import { IS3RecordHandler } from './IS3RecordHandler';
+import { IKinesisLambdaFactory } from './KinesisLambda';
+import { KinesisLambdaServices } from './KinesisLambdaServices';
+import { IKinesisRecordHandler } from './IKinesisRecordHandler';
 
-export interface S3InvocationContext extends Partial<S3Event> {
+export interface KinesisInvocationContext extends Partial<KinesisStreamEvent> {
   // eslint-disable-next-line @typescript-eslint/ban-types
   handler: Function;
   container: IServiceContainer;
@@ -18,23 +18,23 @@ export interface S3InvocationContext extends Partial<S3Event> {
  * @param context
  * @returns
  */
-export async function invokeS3Handler(context: S3InvocationContext): Promise<void> {
+export async function invokeKinesisHandler(context: KinesisInvocationContext): Promise<KinesisStreamBatchResponse> {
   const { container } = context;
-  const factory = container.get<IS3LambdaFactory>(S3LambdaServices.S3LambdaFactory);
+  const factory = container.get<IKinesisLambdaFactory>(KinesisLambdaServices.KinesisLambdaFactory);
   const configuredHandler = factory.createHandler(
-    context.handler as Newable<IS3RecordHandler>,
-  ) as middy.MiddyfiedHandler<S3Event>;
+    context.handler as Newable<IKinesisRecordHandler<any>>,
+  ) as middy.MiddyfiedHandler<KinesisStreamEvent>;
 
   context.Records?.forEach((record) => {
     if (!record.eventSource) {
-      record.eventSource = 'aws:s3';
+      record.eventSource = 'aws:kinesis';
     }
   });
 
-  const event: S3Event = { ...context, handler: undefined, container: undefined } as S3Event;
+  const event = { ...context, handler: undefined, container: undefined } as KinesisStreamEvent;
   const handlerContext = {
     callbackWaitsForEmptyEventLoop: false,
-    functionName: 's3Lambda',
+    functionName: 'kinesisLambda',
     functionVersion: '0.1',
     invokedFunctionArn: 'arn::test',
     memoryLimitInMB: '128',
@@ -42,7 +42,7 @@ export async function invokeS3Handler(context: S3InvocationContext): Promise<voi
     logGroupName: 'test-group',
     logStreamName: 'test-stream',
     getRemainingTimeInMillis: function (): number {
-      return 1000;
+      return 5000;
     },
     done: function (error?: Error | undefined, result?: any): void {
       throw new Error('Function not implemented.');
@@ -55,6 +55,6 @@ export async function invokeS3Handler(context: S3InvocationContext): Promise<voi
     },
   };
 
-  const response = await configuredHandler(event, handlerContext);
+  const response = (await configuredHandler(event, handlerContext)) as KinesisStreamBatchResponse;
   return response;
 }

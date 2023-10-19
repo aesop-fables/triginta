@@ -9,6 +9,7 @@ export * from './http/IConfiguredRoute';
 export * from './http/IHttpEndpoint';
 export * from './http/HttpLambda';
 export * from './http/HttpLambdaServices';
+export * from './kinesis';
 export * from './resolveEnvironmentSettings';
 export * from './s3/IS3RecordHandler';
 export * from './s3/S3Lambda';
@@ -33,6 +34,7 @@ export * as Validation from './validation';
 export * as Logging from './logging';
 
 import * as httpUtils from './http/invokeHttpHandler';
+import * as kinesisUtils from './kinesis/invokeKinesisHandler';
 import * as sqsUtils from './sqs/invokeSqsHandler';
 import * as s3Utils from './s3/invokeS3Handler';
 
@@ -41,6 +43,7 @@ import * as s3Utils from './s3/invokeS3Handler';
  */
 export const TestUtils = {
   ...httpUtils,
+  ...kinesisUtils,
   ...sqsUtils,
   ...s3Utils,
 };
