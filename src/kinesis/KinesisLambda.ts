@@ -13,16 +13,24 @@ import middy from '@middy/core';
 import { IKinesisRecordHandler } from './IKinesisRecordHandler';
 import { getMiddleware } from '../Decorators';
 import { KinesisLambdaServices } from './KinesisLambdaServices';
-import { Context, KinesisStreamEvent, KinesisStreamRecord, KinesisStreamHandler, KinesisStreamBatchResponse } from 'aws-lambda';
+import {
+  Context,
+  KinesisStreamEvent,
+  KinesisStreamRecord,
+  KinesisStreamHandler,
+  KinesisStreamBatchResponse,
+} from 'aws-lambda';
 import { AwsServices } from '../AwsServices';
 import { resolveTrigintaRuntime, trigintafy } from '../TrigintaMiddleware';
+import { IKinesisRecordFailureHandler, KinesisRecordFailureHandler } from './IKinesisFailureHandler';
+import { IKinesisDataSerializer, KinesisDataSerializer } from './IKinesisDataSerializer';
 
 export interface BootstrappedKinesisLambdaContext {
-  createKinesisHandler(newable: Newable<IKinesisRecordHandler>): KinesisStreamHandler;
+  createKinesisHandler<Data>(newable: Newable<IKinesisRecordHandler<Data>>): KinesisStreamHandler;
 }
 
 export interface IKinesisLambdaFactory {
-  createHandler(newable: Newable<IKinesisRecordHandler>): KinesisStreamHandler;
+  createHandler<Data>(newable: Newable<IKinesisRecordHandler<Data>>): KinesisStreamHandler;
 }
 
 function embedKinesisEvent(event: KinesisStreamEvent): IServiceModule {
@@ -49,12 +57,24 @@ export const useTrigintaKinesis = createServiceModule('triginta/kinesis', (servi
     KinesisLambdaFactory,
     Scopes.Transient,
   );
+
+  services.autoResolve<IKinesisDataSerializer>(
+    KinesisLambdaServices.DataSerializer,
+    KinesisDataSerializer,
+    Scopes.Transient,
+  );
+
+  services.autoResolve<IKinesisRecordFailureHandler>(
+    KinesisLambdaServices.FailureHandler,
+    KinesisRecordFailureHandler,
+    Scopes.Transient,
+  );
 });
 
 export class KinesisLambdaFactory implements IKinesisLambdaFactory {
   constructor(@injectContainer() private readonly container: IServiceContainer) {}
 
-  createHandler(newable: Newable<IKinesisRecordHandler>): KinesisStreamHandler {
+  createHandler<Data>(newable: Newable<IKinesisRecordHandler<Data>>): KinesisStreamHandler {
     const handler = async (event: KinesisStreamEvent, context: Context) => {
       const response: KinesisStreamBatchResponse = {
         batchItemFailures: [],
@@ -76,16 +96,19 @@ export class KinesisLambdaFactory implements IKinesisLambdaFactory {
 
           try {
             const innerHandler = childContainer.resolve(newable);
-            // record.kinesis.data.len
+            const deserializer = childContainer.get<IKinesisDataSerializer>(KinesisLambdaServices.DataSerializer);
+            const message = await deserializer.deserializeRecord<Data>(record);
 
-            await innerHandler.handle(message as Message, record, event);
+            await innerHandler.handle(message as Data, record, event);
           } catch (e) {
-            const failureHandler = childContainer.get<ISqsRecordFailureHandler>(SqsLambdaServices.FailureHandler);
+            const failureHandler = childContainer.get<IKinesisRecordFailureHandler>(
+              KinesisLambdaServices.FailureHandler,
+            );
             const shouldReport = await failureHandler.onError(record, e);
 
             if (shouldReport) {
               response.batchItemFailures.push({
-                itemIdentifier: record.messageId,
+                itemIdentifier: record.kinesis.sequenceNumber,
               });
             }
           } finally {
@@ -118,7 +141,7 @@ export class KinesisLambdaFactory implements IKinesisLambdaFactory {
 
 export function createBootstrappedKinesisLambdaContext(container: IServiceContainer): BootstrappedKinesisLambdaContext {
   return {
-    createKinesisHandler(newable: Newable<IKinesisRecordHandler>): KinesisStreamHandler {
+    createKinesisHandler<Data>(newable: Newable<IKinesisRecordHandler<Data>>): KinesisStreamHandler {
       if (typeof container === 'undefined') {
         throw new Error(`Kinesis container not initialized`);
       }
