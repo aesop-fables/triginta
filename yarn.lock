@@ -9,13 +9,10 @@
   dependencies:
     reflect-metadata "^0.1.13"
 
-"@aesop-fables/containr@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.3.4.tgz#fd47ac71e4ac2a7af9b8926bdad394ef39937e32"
-  integrity sha512-HHDi05MmA76nhc0CRJRYihFrX3j/J8W7mQgjcIfQ38Fk+4Zwri31oQZPhd5OUF2Q+9BH4kieu874eu5VOHuPuw==
-  dependencies:
-    jest-mock-extended "^3.0.1"
-    reflect-metadata "^0.1.13"
+"@aesop-fables/containr@^0.6.1":
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/@aesop-fables/containr/-/containr-0.6.1.tgz#993e0d3217a41ece07025a0a0c54fc67cb0446f8"
+  integrity sha512-u19GRAvvCIk6w21+3LJ+7/SpVg1WNdrtD3p2xJRQdZvru0eot2FBBsRbOXuyzsIWRebMfGLPgex0FayRNrRu3g==
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.0"
