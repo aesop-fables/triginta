@@ -1,19 +1,104 @@
 name: triginta:build
 
 on:
-  pull_request
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build:
+  setup-build-workflow:
     runs-on: ubuntu-latest
+
+    outputs:
+      IS_PRERELEASE: ${{ steps.set-vars.outputs.IS_PRERELEASE }}
+      IS_MERGE_TO_MAIN: ${{ steps.set-vars.outputs.IS_MERGE_TO_MAIN }}
+      IS_MERGE_TO_DEVELOP: ${{ steps.set-vars.outputs.IS_MERGE_TO_DEVELOP }}
+      REF_TO_BUILD_AND_TAG: ${{ steps.set-vars.outputs.REF_TO_BUILD_AND_TAG }}
+      IS_DEPENDABOT_PR: ${{ steps.actor_check.outputs.IS_DEPENDABOT_PR }}
+
+    steps:
+      - name: Set default env variables
+        id: set-vars
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const targetRef = '${{ github.base_ref }}';
+            const sourceRef = '${{ github.head_ref }}';
+            const mergeRef = '${{ github.ref }}';
+
+            const prIsDraft = '${{ github.event.pull_request.draft }}' === 'true';
+            const prMergedToMain = mergeRef === 'refs/heads/main';
+
+            const isPreRelease = !prMergedToMain
+
+            // For a detailed explanation of why we use different refs for different scenarios
+            // see https://docs.github.com/en/rest/reference/pulls#get-a-pull-request
+            const refToBuildAndTag = isPreRelease ? sourceRef : mergeRef;
+
+            Object.entries({
+              IS_PRERELEASE: isPreRelease,
+              IS_MERGE_TO_MAIN: prMergedToMain,
+              REF_TO_BUILD_AND_TAG: refToBuildAndTag,
+            }).forEach(pair => {
+              core.setOutput(...pair);
+              console.info(...pair);
+            });
+
+      - name: Check if Dependabot PR
+        id: actor_check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const actor = '${{ github.actor}}';
+            const knownDependabotNames = [
+              'dependabot[bot]',
+              'dependabot'
+            ];
+            const isDependabotPR = knownDependabotNames.includes(actor);
+            core.info(`Is Dependabot PR: ${isDependabotPR}`);
+            core.setOutput('IS_DEPENDABOT_PR', isDependabotPR);
+
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    needs: setup-build-workflow
     permissions:
       contents: read
       packages: write
+      checks: write
+    env:
+      CI: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
-      - run: npm install
-      - run: npm run build
-      - run: npm test
+          node-version: 20
+
+      - name: Restore
+        run: yarn install
+
+      - name: Build
+        run: yarn build
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Test
+        id: test
+        run: yarn test:ci
+
+      - name: Upload Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: Test Report
+          path: reports/jest-*.xml
+          reporter: jest-junit
+
+      - name: Status
+        if: always()
+        continue-on-error: true
+        run: echo "🍏 This job's status is ${{ job.status }}."
