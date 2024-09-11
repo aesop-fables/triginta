@@ -5,6 +5,7 @@ export * from './Decorators';
 export * from './IHandler';
 export * from './ITrigintaRuntime';
 export * from './ITrigintaRuntimeFactory';
+export * from './http';
 export * from './http/IConfiguredRoute';
 export * from './http/IHttpEndpoint';
 export * from './http/HttpLambda';

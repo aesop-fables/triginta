@@ -4,6 +4,7 @@ import {
   APIGatewayProxyEventPathParameters,
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
+  Context,
 } from 'aws-lambda';
 import { IHttpLambdaFactory, NonNoisyEvent } from './HttpLambda';
 import queryString from 'node:querystring';
@@ -148,6 +149,29 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
   return event;
 }
 
+const defaultHandlerContext = {
+  callbackWaitsForEmptyEventLoop: false,
+  functionName: 'httpLambda',
+  functionVersion: '0.1',
+  invokedFunctionArn: 'arn::test',
+  memoryLimitInMB: '128',
+  awsRequestId: '1234',
+  logGroupName: 'test-group',
+  logStreamName: 'test-stream',
+  getRemainingTimeInMillis: function (): number {
+    return 1000;
+  },
+  done: function (error?: Error | undefined, result?: any): void {
+    throw new Error('Function not implemented.');
+  },
+  fail: function (error: string | Error): void {
+    throw new Error('Function not implemented.');
+  },
+  succeed: function (messageOrObject: any): void {
+    throw new Error('Function not implemented.');
+  },
+};
+
 /**
  * Invokes a lambda by constructing it from the specified container
  * @param context
@@ -155,6 +179,7 @@ export function createApiGatewayEvent(context: EventGenerationContext): Partial<
  */
 export async function invokeHttpHandler<Output>(
   context: InvocationContext,
+  handlerContext?: Context,
 ): Promise<APIGatewayProxyStructuredResultV2> {
   const { container } = context;
   const factory = container.get<IHttpLambdaFactory>(HttpLambdaServices.HttpLambdaFactory);
@@ -163,29 +188,6 @@ export async function invokeHttpHandler<Output>(
   ) as middy.MiddyfiedHandler<NonNoisyEvent, APIGatewayProxyStructuredResultV2>;
 
   const event = createApiGatewayEvent(context) as NonNoisyEvent;
-  const handlerContext = {
-    callbackWaitsForEmptyEventLoop: false,
-    functionName: 'httpLambda',
-    functionVersion: '0.1',
-    invokedFunctionArn: 'arn::test',
-    memoryLimitInMB: '128',
-    awsRequestId: '1234',
-    logGroupName: 'test-group',
-    logStreamName: 'test-stream',
-    getRemainingTimeInMillis: function (): number {
-      return 1000;
-    },
-    done: function (error?: Error | undefined, result?: any): void {
-      throw new Error('Function not implemented.');
-    },
-    fail: function (error: string | Error): void {
-      throw new Error('Function not implemented.');
-    },
-    succeed: function (messageOrObject: any): void {
-      throw new Error('Function not implemented.');
-    },
-  };
-
-  const response = await configuredHandler(event, handlerContext);
+  const response = await configuredHandler(event, handlerContext ?? defaultHandlerContext);
   return response;
 }
