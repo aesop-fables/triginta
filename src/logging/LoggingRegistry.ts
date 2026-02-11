@@ -1,9 +1,10 @@
 import { IServiceRegistry, Newable, Scopes, ServiceCollection } from '@aesop-fables/containr';
-import { Logger } from 'aws-sdk/lib/config-base';
 import { ILoggerFactory } from './ILoggerFactory';
 import { LoggingServices } from './LoggingServices';
 import { LoggingLevel } from './Levels';
 import { LoggerFactory } from './LoggerFactory';
+
+declare type Logger = object;
 
 export class LoggingRegistry implements IServiceRegistry {
   constructor(private readonly levels: Newable<LoggingLevel>) {}

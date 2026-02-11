@@ -1,13 +1,15 @@
 import { inject } from '@aesop-fables/containr';
-import { MessageBodyAttributeMap, SendMessageRequest, SendMessageResult } from 'aws-sdk/clients/sqs';
 import { ISqsPublisher } from './SqsPublisher';
 import { SQSMessageAttributes } from 'aws-lambda';
 import { SqsLambdaServices } from './SqsLambdaServices';
 import { ISqsMessage } from './ISqsMessage';
 import { LoggingLevel, LoggingServices } from '../logging';
 import { TrigintaHeaders } from '../TrigintaHeaders';
+import { MessageAttributeValue, SendMessageRequest, SendMessageResult } from '@aws-sdk/client-sqs';
 
 declare type ConfigureSqsDelegate = (params: SendMessageRequest) => Promise<void>;
+
+declare type MessageBodyAttributeMap = Record<string, MessageAttributeValue>;
 
 export interface IMessagePublisher {
   publish(

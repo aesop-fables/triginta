@@ -26,6 +26,7 @@
   "devDependencies": {
     "@aesop-fables/containr": "^0.6.1",
     "@aesop-fables/containr-testing": "^0.3.0",
+    "@aws-sdk/client-sqs": "^3.987.0",
     "@middy/core": "^4.5.1",
     "@middy/http-error-handler": "^4.5.1",
     "@middy/http-json-body-parser": "^4.5.1",
@@ -35,7 +36,6 @@
     "@types/node": "^18.16.17",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "5.59.11",
-    "aws-sdk": "^2.1386.0",
     "esbuild": "^0.18.16",
     "eslint": "8.42.0",
     "eslint-config-prettier": "^8.5.0",
@@ -53,10 +53,10 @@
   ],
   "peerDependencies": {
     "@aesop-fables/containr": "0.5.x",
+    "@aws-sdk/client-sqs": "3.x",
     "@middy/core": "4.x",
     "@middy/http-error-handler": "4.x",
     "@middy/http-json-body-parser": "4.x",
-    "aws-sdk": "2.x",
     "reflect-metadata": "0.1.x"
   },
   "repository": {

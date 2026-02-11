@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import { any } from 'jest-mock-extended';
-import { SendMessageRequest, SendMessageResult } from 'aws-sdk/clients/sqs';
+import { SendMessageRequest, SendMessageResult } from '@aws-sdk/client-sqs';
 import { BaseSqsMessage, SqsLambdaServices, MessagePublisher, IQueue, Queue, ISqsPublisher } from '..';
 import { InteractionContext, createInteractionContext } from '@aesop-fables/containr-testing';
 import { SQSMessageAttributes } from 'aws-lambda';

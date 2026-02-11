@@ -1,4 +1,4 @@
-import { CreateQueueRequest } from 'aws-sdk/clients/sqs';
+import { CreateQueueRequest } from '@aws-sdk/client-sqs';
 import { SettingsExpression } from '../resolveEnvironmentSettings';
 
 export interface IQueue extends CreateQueueRequest {
