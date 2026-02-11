@@ -5,7 +5,7 @@ import { inject, injectArray } from '@aesop-fables/containr';
 
 export interface ISqsRecordMatcher {
   matches(record: SQSRecord): boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   deserializeMessage<Message extends ISqsMessage>(record: SQSRecord): Promise<Message>;
 }
 
@@ -16,6 +16,7 @@ const jsonSafeParse = (text: any) => {
   if (firstChar !== '{' && firstChar !== '[' && firstChar !== '"') return text;
   try {
     return JSON.parse(text);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-empty
   } catch (e) {}
   return text;
 };
@@ -86,7 +87,6 @@ export declare type MessageExpression<Message extends ISqsMessage> = Omit<
 
 // Test coverage in SqsLambda.test.ts
 export function createMatcher<Message extends ISqsMessage, Options>(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   configuration: MessageConfig<MessageExpression<Message>, Options>,
 ): ISqsRecordMatcher {
   const { attributes: attributeMap, constructUsing, type } = configuration;

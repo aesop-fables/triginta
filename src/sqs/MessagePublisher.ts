@@ -20,7 +20,6 @@ export interface IMessagePublisher {
 }
 
 export class MessagePublisher implements IMessagePublisher {
-  // eslint-disable-next-line prettier/prettier
   constructor(
     @inject(SqsLambdaServices.SqsPublisher) private readonly sqsPublisher: ISqsPublisher,
     @inject(LoggingServices.Levels) private readonly levels: LoggingLevel,

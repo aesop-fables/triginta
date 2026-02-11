@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { createServiceModuleWithOptions } from '@aesop-fables/containr';
 import { HttpLambdaServices, IHttpResponseGenerator, IConfiguredRoute, createTrigintaApp } from '..';

@@ -47,7 +47,6 @@ class TestBodyMessage extends BaseSqsMessage {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   getData() {
     return this.body;
   }
@@ -91,7 +90,6 @@ describe('MessagePublisher', () => {
       MessageId: 'HappyPath',
     };
 
-    // eslint-disable-next-line prettier/prettier
     context
       .mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher)
       .sendMessage.calledWith(any())
@@ -99,10 +97,8 @@ describe('MessagePublisher', () => {
 
     const response = await context.classUnderTest.publish(testMessage);
     expect(response).toEqual(result);
-    // eslint-disable-next-line prettier/prettier
-    expect(
-      context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
-    ).toHaveBeenCalledWith(message);
+
+    expect(context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage).toHaveBeenCalledWith(message);
   });
 
   test('Message does not contain JobID', async () => {
@@ -122,7 +118,6 @@ describe('MessagePublisher', () => {
       MessageId: 'HappyPath',
     };
 
-    // eslint-disable-next-line prettier/prettier
     context
       .mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher)
       .sendMessage.calledWith(any())
@@ -130,10 +125,8 @@ describe('MessagePublisher', () => {
 
     const response = await context.classUnderTest.publish(testMessage);
     expect(response).toEqual(result);
-    // eslint-disable-next-line prettier/prettier
-    expect(
-      context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
-    ).toHaveBeenCalledWith(message);
+
+    expect(context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage).toHaveBeenCalledWith(message);
   });
 
   test('Message contains a body', async () => {
@@ -157,7 +150,6 @@ describe('MessagePublisher', () => {
       MessageId: 'HappyPath',
     };
 
-    // eslint-disable-next-line prettier/prettier
     context
       .mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher)
       .sendMessage.calledWith(any())
@@ -165,10 +157,8 @@ describe('MessagePublisher', () => {
 
     const response = await context.classUnderTest.publish(testMessage);
     expect(response).toEqual(result);
-    // eslint-disable-next-line prettier/prettier
-    expect(
-      context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage,
-    ).toHaveBeenCalledWith(message);
+
+    expect(context.mockFor<ISqsPublisher>(SqsLambdaServices.SqsPublisher).sendMessage).toHaveBeenCalledWith(message);
   });
 
   test('Merges the default attributes', async () => {

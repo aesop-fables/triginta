@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { Scopes, createServiceModule, inject } from '@aesop-fables/containr';
 import { SQSMessageAttributes, SQSRecord } from 'aws-lambda';
@@ -78,12 +77,14 @@ const useRecorder = createServiceModule('useRecorder', (services) =>
   services.singleton<MessageRecorder<any>>(recorderKey, new MessageRecorder<any>()),
 );
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const errorRegistry: any[] = [];
 class RecordingFailureHandler implements ISqsRecordFailureHandler {
   // Injecting contextual services here SHOULD work
   // This is a safety net so leave it here, please.
   constructor(@inject(SqsLambdaServices.CurrentRecord) private readonly record: SQSRecord) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async onError(record: SQSRecord, error: any): Promise<boolean> {
     errorRegistry.push(error);
     return true;

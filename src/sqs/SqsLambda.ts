@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   createContainer,
@@ -67,6 +65,7 @@ export class SqsLambdaFactory implements ISqsLambdaFactory {
 
       for (let i = 0; i < event.Records.length; i++) {
         const record = event.Records[i];
+        // eslint-disable-next-line no-useless-catch
         try {
           const { container } = resolveTrigintaRuntime<SQSEvent>(context);
           if (!container) {

@@ -50,7 +50,7 @@ export function trigintafy<TEvent, TContext extends Context = Context>(
   options: TrigintaMiddlewareOptions,
 ) {
   let midHandler = middy(handler).use(trigintaMiddlware(options));
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   middlewareMetadata.forEach((midFunc: Function) => {
     midHandler = midHandler.use(midFunc());
   });

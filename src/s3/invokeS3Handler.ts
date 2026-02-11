@@ -8,7 +8,7 @@ import { S3LambdaServices } from './S3LambdaServices';
 import { IS3RecordHandler } from './IS3RecordHandler';
 
 export interface S3InvocationContext extends Partial<S3Event> {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   handler: Function;
   container: IServiceContainer;
 }

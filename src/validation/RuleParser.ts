@@ -14,7 +14,6 @@ export declare type ValidationSchema<Model> = {
   [Property in keyof Model]: ValidationExpression<Model[Property]>;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseRules<Model>(schema: ValidationSchema<Model>) {
   const rules: IConfiguredValidationRule[] = [];
   Object.keys(schema).forEach((field) => {
