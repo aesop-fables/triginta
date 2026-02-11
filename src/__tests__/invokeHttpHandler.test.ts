@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import 'reflect-metadata';
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { createTrigintaApp, httpPost, IHttpEndpoint, TestUtils, useMiddleware } from '..';

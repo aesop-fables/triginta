@@ -1,3 +1,3 @@
-import AWS from 'aws-sdk';
+import { SQSClientConfig } from '@aws-sdk/client-sqs';
 
-export declare type SqsSettings = AWS.SQS.ClientConfiguration;
+export declare type SqsSettings = SQSClientConfig;

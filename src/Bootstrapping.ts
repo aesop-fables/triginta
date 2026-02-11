@@ -1,4 +1,6 @@
+/* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 import {
   IServiceContainer,
   IServiceModule,

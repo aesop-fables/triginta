@@ -25,6 +25,7 @@ import {
 } from '..';
 import middy from '@middy/core';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface InitializeRequest {}
 
 @httpGet('/http-lambda/initialize')
@@ -37,7 +38,6 @@ class InitializeEndpoint implements IHttpEndpoint<InitializeRequest, string> {
 
 @httpGet('/http-lambda/initialize/without-input')
 class InitializeWithoutInputEndpoint implements IHttpEventHandler<string> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async handle(event: APIGatewayProxyEventV2): Promise<string> {
     return `Hello, ${event.headers['x-message']}`;
   }

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-wrapper-object-types */
 import { HttpMethod, IConfiguredRoute } from './http/IConfiguredRoute';
 import RouteRegistry from './RouteRegistry';
 
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 export const endpointMetadataKey = Symbol('@endpointMetadataKey');
 
 function defineEndpointMetadata(method: HttpMethod, route: string) {

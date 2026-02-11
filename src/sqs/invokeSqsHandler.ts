@@ -8,7 +8,7 @@ import { SqsLambdaServices } from './SqsLambdaServices';
 import { ISqsMessageHandler } from './ISqsMessageHandler';
 
 export interface SqsInvocationContext extends Partial<SQSEvent> {
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   handler: Function;
   container: IServiceContainer;
 }
