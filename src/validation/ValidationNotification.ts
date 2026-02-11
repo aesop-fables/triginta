@@ -79,7 +79,10 @@ export class ValidationNotification {
 }
 
 export class PrefixedValidationNotification extends ValidationNotification {
-  constructor(protected readonly prefix: string, private readonly prefixRegistration = true) {
+  constructor(
+    protected readonly prefix: string,
+    private readonly prefixRegistration = true,
+  ) {
     super();
   }
 

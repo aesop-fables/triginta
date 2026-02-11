@@ -14,7 +14,10 @@ export const TrigintaMessageHeaders = {
 };
 
 export abstract class BaseSqsMessage implements ISqsMessage {
-  constructor(readonly type: string, readonly queue: IQueue) {}
+  constructor(
+    readonly type: string,
+    readonly queue: IQueue,
+  ) {}
 
   getQueueUrl(): string {
     const { queue } = resolveEnvironmentSettings({ queue: this.queue.toEnvExpression() });

@@ -6,7 +6,10 @@ import { IServiceContainer } from '@aesop-fables/containr';
 
 export class Validator implements IValidator {
   private readonly keys: string[];
-  constructor(private readonly container: IServiceContainer, private readonly rules: IConfiguredValidationRule[]) {
+  constructor(
+    private readonly container: IServiceContainer,
+    private readonly rules: IConfiguredValidationRule[],
+  ) {
     this.keys = [];
 
     rules.forEach(({ field }) => {

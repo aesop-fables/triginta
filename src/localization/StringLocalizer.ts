@@ -4,7 +4,10 @@ import { IStringLocalizer } from './IStringLocalizer';
 import { LocalizedString } from './LocalizedString';
 
 export class StringLocalizer implements IStringLocalizer {
-  constructor(private readonly storage: ILocalizationStorage, private readonly cultureContext: ICultureContext) {}
+  constructor(
+    private readonly storage: ILocalizationStorage,
+    private readonly cultureContext: ICultureContext,
+  ) {}
 
   resolve(value: LocalizedString): string {
     const culture = this.cultureContext.detectCulture();

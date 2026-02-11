@@ -41,7 +41,6 @@ export function parseRouteParams(route: string, path: string): APIGatewayProxyEv
   }
 
   if (!routeToParse.startsWith('/')) {
-    // eslint-disable-next-line no-useless-assignment
     routeToParse = `/${routeToParse}`;
   }
 

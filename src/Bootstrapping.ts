@@ -34,9 +34,7 @@ declare type ConfiguredServices<T> = {
 };
 
 interface BootstrappedTrigintaApp
-  extends BootstrappedHttpLambdaContext,
-    BootstrappedSqsLambdaContext,
-    BootstrappedS3LambdaContext {
+  extends BootstrappedHttpLambdaContext, BootstrappedSqsLambdaContext, BootstrappedS3LambdaContext {
   containers: ConfiguredServices<IServiceContainer>;
 }
 

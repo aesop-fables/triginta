@@ -52,7 +52,10 @@ const SpinUpMessageType = 'spin-up';
 const JobQueue: IQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
 
 class SpinUpTenantMessage extends BaseSqsMessage {
-  constructor(readonly tenant: string, readonly options: TenantOptions) {
+  constructor(
+    readonly tenant: string,
+    readonly options: TenantOptions,
+  ) {
     super(SpinUpMessageType, JobQueue);
   }
 

@@ -5,7 +5,10 @@ import { ValidationContext } from './ValidationContext';
 import { ValidationServices } from './ValidationServices';
 
 export class ArrayContinuationRule implements IValidationRule {
-  constructor(private readonly field: string, private readonly schema: IConfiguredValidationRule[]) {}
+  constructor(
+    private readonly field: string,
+    private readonly schema: IConfiguredValidationRule[],
+  ) {}
   async validate(context: ValidationContext): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const array = context.value() as any[];

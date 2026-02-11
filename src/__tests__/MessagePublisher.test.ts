@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import { any } from 'jest-mock-extended';
 import { SendMessageRequest, SendMessageResult } from '@aws-sdk/client-sqs';
@@ -8,7 +9,10 @@ import { SQSMessageAttributes } from 'aws-lambda';
 const jobQueue: IQueue = Queue.for('job', 'JOB_QUEUE_URL', 'job.job');
 
 class TestStartUpMessage extends BaseSqsMessage {
-  constructor(readonly type: string, readonly jobId: string) {
+  constructor(
+    readonly type: string,
+    readonly jobId: string,
+  ) {
     super(type, jobQueue);
   }
 
@@ -31,8 +35,11 @@ class TestMessage extends BaseSqsMessage {
 }
 
 class TestBodyMessage extends BaseSqsMessage {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(readonly type: string, readonly jobId: string, readonly body: any) {
+  constructor(
+    readonly type: string,
+    readonly jobId: string,
+    readonly body: any,
+  ) {
     super(type, jobQueue);
   }
 
