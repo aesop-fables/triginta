@@ -56,7 +56,7 @@
     "lib/**/*"
   ],
   "peerDependencies": {
-    "@aesop-fables/containr": "0.5.x",
+    "@aesop-fables/containr": "0.6.x",
     "@aws-sdk/client-sqs": "3.x",
     "@middy/core": "4.x",
     "@middy/http-error-handler": "4.x",
